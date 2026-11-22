@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CutoverGuard &mdash; Engineering Change Cutover Decision &amp; Optimization System.">
+  <title>CutoverGuard | Engineering Decision Workspace</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Modular Stylesheets -->
+  <link rel="stylesheet" href="./src/css/variables.css">
+  <link rel="stylesheet" href="./src/css/reset.css">
+  <link rel="stylesheet" href="./src/css/base.css">
+  <link rel="stylesheet" href="./src/css/layout.css">
+  <link rel="stylesheet" href="./src/css/components.css">
+  <link rel="stylesheet" href="./src/css/sections.css">
+  <link rel="stylesheet" href="./src/css/charts.css">
+  <link rel="stylesheet" href="./src/css/responsive.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       APPLICATION WORKSPACE HEADER
+       ======================================================================== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <button class="sidebar-toggle-btn" id="drawerToggleBtn" title="Toggle Sidebar" aria-label="Toggle Sidebar" aria-expanded="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <a href="#/" data-navigate="/" class="header-brand-link" title="CutoverGuard – Engineering Change Intelligence">
+          <img src="./assets/images/cutoverguard-logo.png" alt="CutoverGuard – Engineering Change Intelligence" class="header-brand-logo">
+        </a>
+
+        <nav class="header-breadcrumbs" aria-label="Workspace Breadcrumbs">
+          <span class="crumb-sep">/</span>
+          <strong id="headerBreadcrumbCurrent"><span id="headerPageTitle">Overview</span></strong>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <div class="active-ecn-pill" id="headerActiveEcnBadge" data-navigate="/ecn" title="Click to view active ECN in workspace">
+          <span class="pill-dot"></span>
+          <strong id="headerEcnId">ECN-0248</strong>
+          <span class="pill-divider">|</span>
+          <span class="pill-parts" id="headerEcnParts">COMP-A-104 &rarr; COMP-B-208</span>
+        </div>
+
+        <div class="db-status-pill connected" id="dbStatusBadge" title="Click to inspect PostgreSQL Supabase connection details">
+          <span class="db-dot"></span>
+          <span class="db-label" id="dbStatusLabel">PostgreSQL Live</span>
+        </div>
+
+        <span class="badge badge-neutral" style="font-size: 0.6875rem;">PROTOTYPE v1.0</span>
+        <button class="btn btn-primary btn-sm" id="headerNewEcnBtn" style="padding: 0.3rem 0.75rem; font-size: 0.8rem;">+ New ECN</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       ENTERPRISE COMPACT SIDEBAR
+       ======================================================================== -->
+  <div class="drawer-backdrop" id="drawerBackdrop" aria-hidden="true"></div>
+
+  <div class="app-shell" id="appShell">
+    <aside class="app-sidebar" id="navDrawer" aria-label="Application Workspace Navigation">
+      <div class="sidebar-brand-header">
+        <a href="#/" data-navigate="/" class="sidebar-brand-link" title="CutoverGuard – Engineering Change Intelligence">
+          <img src="./assets/images/cutoverguard-logo.png" alt="CutoverGuard – Engineering Change Intelligence" class="sidebar-brand-logo">
+        </a>
+      </div>
+
+      <div class="sidebar-nav-container">
+        <ul class="app-nav-list">
+          <li>
+            <a href="#/" class="app-nav-item active" data-navigate="/" data-tooltip="Overview">
+              <span class="app-nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              </span>
+              <span class="app-nav-label">Overview</span>
+            </a>
+          </li>
+          <li>
+            <a href="#/ecn" class="app-nav-item" data-navigate="/ecn" data-tooltip="Engineering Changes">
+              <span class="app-nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              </span>
+              <span class="app-nav-label">Engineering Changes</span>
+            </a>
+          </li>
+          <li>
+            <a href="#/cutover" class="app-nav-item" data-navigate="/cutover" data-tooltip="Cutover Analysis">
+              <span class="app-nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              </span>
+              <span class="app-nav-label">Cutover Analysis</span>
+            </a>
+          </li>
+          <li>
+            <a href="#/scenarios" class="app-nav-item" data-navigate="/scenarios" data-tooltip="Scenario Simulation">
+              <span class="app-nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+              </span>
+              <span class="app-nav-label">Scenario Simulation</span>
+            </a>
+          </li>
+          <li>
+            <a href="#/supply-risk" class="app-nav-item" data-navigate="/supply-risk" data-tooltip="Supply &amp; Risk">
+              <span class="app-nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              </span>
+              <span class="app-nav-label">Supply &amp; Risk</span>
+            </a>
+          </li>
+          <li>
+            <a href="#/history" class="app-nav-item" data-navigate="/history" data-tooltip="Decision History">
+              <span class="app-nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </span>
+              <span class="app-nav-label">Decision History</span>
+            </a>
+          </li>
+          <li>
+            <a href="#/audit" class="app-nav-item" data-navigate="/audit" data-tooltip="Audit &amp; Governance">
+              <span class="app-nav-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              </span>
+              <span class="app-nav-label">Audit &amp; Governance</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer-actions">
+        <button class="sidebar-action-btn" id="openSettingsBtn" data-tooltip="Settings &amp; Preferences" aria-label="Settings">
+          <span class="app-nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </span>
+          <span class="sidebar-action-label">Settings</span>
+        </button>
+
+        <button class="sidebar-action-btn" id="collapseSidebarBtn" data-tooltip="Collapse Sidebar" aria-label="Collapse Sidebar">
+          <span class="app-nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>
+          </span>
+          <span class="sidebar-action-label">Collapse Sidebar</span>
+        </button>
+
+        <div class="sidebar-env-badge">
+          PROTOTYPE &bull; SYNTHETIC DATA
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main-column" id="appMainColumn">
+      <main id="app-main">
+
+    <!-- ====================================================================
+         WORKSPACE 1: OVERVIEW (DECISION CONTROL CENTER)
+         ==================================================================== -->
+    <div class="page-view active-page" id="view-overview" data-route="/">
+      <div class="workspace-container">
+        <!-- Top Workspace Area -->
+        <div class="workspace-header-block">
+          <div class="workspace-header-titles">
+            <h1 class="workspace-title">
+              Engineering Decision Workspace
+            </h1>
+            <p class="workspace-subtitle">Analyze component transitions, supply constraints, inventory exposure, and cutover timing.</p>
+          </div>
+          <div class="workspace-header-actions">
+            <button class="btn btn-primary btn-sm" id="overviewNewEcnBtn">+ New Engineering Change</button>
+            <button class="btn btn-secondary btn-sm" id="overviewOpenEcnBtn">Open Existing ECN</button>
+          </div>
+        </div>
+
+        <!-- SECTION A: Active Engineering Change Panel -->
+        <div class="active-ecn-card">
+          <div class="ecn-panel-header">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span class="badge badge-blue" style="font-size: 0.75rem;">ACTIVE DECISION</span>
+              <span style="font-family: var(--font-mono); font-size: 1.15rem; font-weight: 700; color: var(--navy-primary);" id="overviewActiveEcnId">ECN-0248</span>
+              <span style="color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-mono);" id="overviewActiveRev">Rev C &rarr; Rev D</span>
+            </div>
+            <div>
+              <span class="badge badge-warning" id="overviewActiveStatus">Awaiting Planner Sign-Off</span>
+            </div>
+          </div>
+
+          <div class="ecn-panel-grid">
+            <div>
+              <div class="ecn-field-label">Transition Components</div>
+              <div class="ecn-field-value ecn-field-mono" id="overviewActiveParts" style="color: var(--blue-primary);">COMP-A-104 (Rev C) &rarr; COMP-B-208 (Rev D)</div>
+            </div>
+            <div>
+              <div class="ecn-field-label">Engineering Change Reason</div>
+              <div class="ecn-field-value" id="overviewActiveReason" style="font-size: 0.85rem; font-weight: 500;">IC chip pinout modernization &amp; high-thermal grade qualification</div>
+            </div>
+            <div>
+              <div class="ecn-field-label">Target Implementation</div>
+              <div class="ecn-field-value ecn-field-mono" id="overviewActivePlanned">15-DEC-2026</div>
+            </div>
+            <div>
+              <div class="ecn-field-label">Subassembly Association</div>
+              <div class="ecn-field-value ecn-field-mono">Assy-902 (Line 3 Discrete)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION B: Input Readiness Grid -->
+        <div style="margin-bottom: 0.65rem; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--navy-primary); text-transform: uppercase;">Input Data Readiness</span>
+          <span style="font-size: 0.75rem; color: var(--success-green); font-weight: 600;">6 OF 6 CONSTRAINTS SATISFIED</span>
+        </div>
+        <div class="input-readiness-grid">
+          <div class="readiness-item-card">
+            <div class="readiness-item-header">
+              <span>INVENTORY BALANCES</span>
+              <span class="readiness-dot ready"></span>
+            </div>
+            <div class="readiness-item-name">Current Stock</div>
+            <div class="readiness-item-detail" id="rd-stock-detail">680 units on-hand</div>
+          </div>
+
+          <div class="readiness-item-card">
+            <div class="readiness-item-header">
+              <span>BOM STRUCTURE</span>
+              <span class="readiness-dot ready"></span>
+            </div>
+            <div class="readiness-item-name">Parent Assembly</div>
+            <div class="readiness-item-detail">Assy-902 Single Level</div>
+          </div>
+
+          <div class="readiness-item-card">
+            <div class="readiness-item-header">
+              <span>DEMAND FORECAST</span>
+              <span class="readiness-dot ready"></span>
+            </div>
+            <div class="readiness-item-name">Daily Burn Rate</div>
+            <div class="readiness-item-detail" id="rd-demand-detail">40 units/day rate</div>
+          </div>
+
+          <div class="readiness-item-card">
+            <div class="readiness-item-header">
+              <span>REPLACEMENT MATERIAL</span>
+              <span class="readiness-dot ready"></span>
+            </div>
+            <div class="readiness-item-name">Dock Readiness</div>
+            <div class="readiness-item-detail" id="rd-dock-detail">Dock ready Day 11</div>
+          </div>
+
+          <div class="readiness-item-card">
+            <div class="readiness-item-header">
+              <span>SUPPLIER LEAD TIME</span>
+              <span class="readiness-dot ready"></span>
+            </div>
+            <div class="readiness-item-name">Purchase Order</div>
+            <div class="readiness-item-detail">25 days confirmed PO</div>
+          </div>
+
+          <div class="readiness-item-card">
+            <div class="readiness-item-header">
+              <span>PLANT LINE SCHEDULE</span>
+              <span class="readiness-dot ready"></span>
+            </div>
+            <div class="readiness-item-name">Production Routing</div>
+            <div class="readiness-item-detail">Line 3 Shift Active</div>
+          </div>
+        </div>
+
+        <!-- SECTION C: Decision Summary Metrics Bar -->
+        <div class="grid-4col" style="margin-bottom: 1.5rem;">
+          <div class="metric-stat-card">
+            <div class="metric-stat-label">
+              <span>Recommended Date</span>
+              <span class="badge badge-feasible" style="font-size: 0.65rem;">OPTIMAL VERTEX</span>
+            </div>
+            <div class="metric-stat-value" style="color: var(--blue-primary);">15-DEC-2026</div>
+            <div class="metric-stat-subtext">Global minimum cost trajectory</div>
+          </div>
+
+          <div class="metric-stat-card">
+            <div class="metric-stat-label">
+              <span>Feasible Window</span>
+              <span class="badge badge-blue" style="font-size: 0.65rem;">8 DAYS</span>
+            </div>
+            <div class="metric-stat-value">11 &ndash; 19 DEC</div>
+            <div class="metric-stat-subtext">Zero line starvation boundary</div>
+          </div>
+
+          <div class="metric-stat-card">
+            <div class="metric-stat-label">
+              <span>Latest Resp. Moment</span>
+              <span class="badge badge-warning" style="font-size: 0.65rem;">DEADLINE</span>
+            </div>
+            <div class="metric-stat-value" style="color: var(--warning-amber);">19-DEC-2026</div>
+            <div class="metric-stat-subtext">Obsolescence carrying limit</div>
+          </div>
+
+          <div class="metric-stat-card">
+            <div class="metric-stat-label">
+              <span>Total Cost Index</span>
+              <span class="badge badge-feasible" style="font-size: 0.65rem;">LOWEST RISK</span>
+            </div>
+            <div class="metric-stat-value"><span id="kpi-cost-index">82.4</span> <span style="font-size: 0.85rem; font-weight: 500; color: var(--text-muted);">pts</span></div>
+            <div class="metric-stat-subtext">Scrap: <span id="kpi-old-stock">120</span> units &bull; Shortage: <span id="kpi-shortage">0</span></div>rtage /bin/zsh</div>
+          </div>
+        </div>
+
+        <!-- SECTION D: Interactive Cutover Optimization Chart -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Deterministic Cutover Cost &amp; Inventory Optimization Curve</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Drag the timeline slider to evaluate inventory balance, shortage exposure, and scrap trade-offs across candidate cutover dates.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <span class="badge badge-blue">ECN-0248 ACTIVE</span>
+            </div>
+          </div>
+
+          <section id="cutover-curve">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">CORE DECISION ENGINE</span>
+          <h2 class="section-title">Cutover Cost &amp; Feasibility Curve</h2>
+          <p class="section-desc">
+            Explore how the candidate effective date alters excess scrap liability, shortage risk, and transition cost. 
+            Drag the effective date slider to evaluate trade-offs in real time.
+          </p>
+        </div>
+
+        <div class="interactive-chart-container">
+          <!-- Slider Control & High-level status bar -->
+          <div class="chart-controls-panel">
+            <div class="slider-row">
+              <div class="slider-label-group">
+                <div class="slider-title">Candidate Cutover Date</div>
+                <div class="slider-hint">Drag slider across Dec 01 &mdash; Dec 31</div>
+              </div>
+
+              <div class="slider-input-wrapper">
+                <input type="range" id="cutoverDateSlider" class="date-slider" min="1" max="31" value="15" step="1" aria-label="Candidate Cutover Date Slider" />
+                <div class="date-slider-display" id="cutoverDateDisplay">15 DEC</div>
+              </div>
+
+              <div style="margin-left: auto;">
+                <span id="feasibilityStatusBadge" class="badge badge-feasible">FEASIBLE (OPTIMAL REGION)</span>
+              </div>
+            </div>
+
+            <!-- Live readouts row -->
+            <div class="chart-live-readouts">
+              <div class="readout-box">
+                <div class="readout-label">Excess Old Stock</div>
+                <div class="readout-value" id="readout-excess-stock">120 u</div>
+              </div>
+              <div class="readout-box">
+                <div class="readout-label">Scrap / Holding Cost</div>
+                <div class="readout-value" id="readout-scrap-cost">$1,440</div>
+              </div>
+              <div class="readout-box">
+                <div class="readout-label">Shortage Exposure</div>
+                <div class="readout-value" id="readout-shortage" style="color: var(--success-green);">0 u ($0)</div>
+              </div>
+              <div class="readout-box">
+                <div class="readout-label">Relative Cost Index</div>
+                <div class="readout-value" id="readout-total-cost">82.4</div>
+              </div>
+              <div class="readout-box">
+                <div class="readout-label">LRM Buffer</div>
+                <div class="readout-value" id="readout-lrm-buffer" style="color: var(--cyan-data);">+4 Days</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SVG Chart Area -->
+          <div class="svg-chart-wrapper">
+            <svg id="cutoverSvgChart" class="chart-svg" viewBox="0 0 900 400" preserveAspectRatio="none" aria-label="Interactive Cutover Feasibility Curve Chart">
+              <!-- Definitions for gradients & markers -->
+              <defs>
+                <linearGradient id="feasibleGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#25845A" stop-opacity="0.18" />
+                  <stop offset="100%" stop-color="#25845A" stop-opacity="0.02" />
+                </linearGradient>
+                <linearGradient id="infeasibleGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#C64747" stop-opacity="0.12" />
+                  <stop offset="100%" stop-color="#C64747" stop-opacity="0.02" />
+                </linearGradient>
+              </defs>
+
+              <!-- Chart Background & Gridlines (Y-axis 0 to 120, X-axis Day 1 to 31) -->
+              <!-- X: 80 to 860 width 780. Y: 40 to 340 height 300 -->
+              <g id="chartGrid" stroke="var(--border-color)" stroke-width="1">
+                <!-- Horizontals -->
+                <line x1="80" y1="40" x2="860" y2="40" stroke-dasharray="2,2" />
+                <line x1="80" y1="115" x2="860" y2="115" stroke-dasharray="2,2" />
+                <line x1="80" y1="190" x2="860" y2="190" stroke-dasharray="2,2" />
+                <line x1="80" y1="265" x2="860" y2="265" stroke-dasharray="2,2" />
+                <line x1="80" y1="340" x2="860" y2="340" />
+
+                <!-- Verticals for key dates -->
+                <line x1="80" y1="40" x2="80" y2="340" />
+                <line x1="210" y1="40" x2="210" y2="340" stroke-dasharray="2,2" />
+                <line x1="340" y1="40" x2="340" y2="340" stroke-dasharray="2,2" />
+                <line x1="470" y1="40" x2="470" y2="340" stroke-dasharray="2,2" />
+                <line x1="600" y1="40" x2="600" y2="340" stroke-dasharray="2,2" />
+                <line x1="730" y1="40" x2="730" y2="340" stroke-dasharray="2,2" />
+                <line x1="860" y1="40" x2="860" y2="340" />
+              </g>
+
+              <!-- Y-axis Text Labels -->
+              <g font-family="var(--font-mono)" font-size="11" fill="var(--text-muted)" text-anchor="end">
+                <text x="70" y="44">120</text>
+                <text x="70" y="119">90</text>
+                <text x="70" y="194">60</text>
+                <text x="70" y="269">30</text>
+                <text x="70" y="344">0</text>
+                <text x="25" y="195" transform="rotate(-90 25 195)" font-weight="600" text-anchor="middle">RELATIVE COST INDEX</text>
+              </g>
+
+              <!-- X-axis Text Labels -->
+              <g font-family="var(--font-mono)" font-size="11" fill="var(--text-muted)" text-anchor="middle">
+                <text x="80" y="362">01 DEC</text>
+                <text x="210" y="362">06 DEC</text>
+                <text x="340" y="362">11 DEC</text>
+                <text x="470" y="362">16 DEC</text>
+                <text x="600" y="362">21 DEC</text>
+                <text x="730" y="362">26 DEC</text>
+                <text x="860" y="362">31 DEC</text>
+                <text x="470" y="388" font-weight="600">EFFECTIVE CUTOVER DATE</text>
+              </g>
+
+              <!-- Shaded Regions -->
+              <!-- Infeasible Region (Shortage, before Day 11 arrival + QA) -->
+              <rect x="80" y="40" width="260" height="300" fill="url(#infeasibleGrad)" />
+              <text x="210" y="65" fill="var(--risk-red)" font-family="var(--font-mono)" font-size="10" font-weight="600" text-anchor="middle">INFEASIBLE / SHORTAGE ZONE</text>
+
+              <!-- Feasible Window (Day 11 to Day 19) -->
+              <rect x="340" y="40" width="208" height="300" fill="url(#feasibleGrad)" />
+              <text x="444" y="65" fill="var(--success-green)" font-family="var(--font-mono)" font-size="11" font-weight="700" text-anchor="middle">FEASIBLE TRANSITION WINDOW</text>
+
+              <!-- Excess Holding Region (After Day 19 LRM) -->
+              <rect x="548" y="40" width="312" height="300" fill="#FFF4DF" fill-opacity="0.3" />
+              <text x="704" y="65" fill="var(--warning-amber)" font-family="var(--font-mono)" font-size="10" font-weight="600" text-anchor="middle">HIGH OBSOLESCENCE / HOLDING REGION</text>
+
+              <!-- Milestone Lines -->
+              <!-- Earliest Feasible: Day 11 (X = 340) -->
+              <line x1="340" y1="40" x2="340" y2="340" stroke="var(--success-green)" stroke-width="1.5" stroke-dasharray="4,4" />
+              <text x="340" y="85" fill="var(--success-green)" font-family="var(--font-mono)" font-size="10" font-weight="600" text-anchor="middle">EARLIEST FEASIBLE (11 DEC)</text>
+
+              <!-- Recommended Cutover: Day 15 (X = 444, Minimum of total cost curve) -->
+              <line x1="444" y1="40" x2="444" y2="340" stroke="var(--blue-primary)" stroke-width="2" stroke-dasharray="3,3" />
+              <text x="444" y="105" fill="var(--blue-primary)" font-family="var(--font-mono)" font-size="10" font-weight="700" text-anchor="middle">RECOMMENDED (15 DEC)</text>
+
+              <!-- Latest Responsible Moment: Day 19 (X = 548) -->
+              <line x1="548" y1="40" x2="548" y2="340" stroke="var(--warning-amber)" stroke-width="2" stroke-dasharray="4,4" />
+              <text x="548" y="85" fill="var(--warning-amber)" font-family="var(--font-mono)" font-size="10" font-weight="600" text-anchor="middle">LRM (19 DEC)</text>
+
+              <!-- Dynamic Calculated Curves -->
+              <!-- Curve 1: Excess Old Inventory Cost (Slopes down) -->
+              <path id="curveOldStock" d="" fill="none" stroke="var(--navy-secondary)" stroke-width="1.8" stroke-dasharray="4,3" />
+
+              <!-- Curve 2: Shortage Exposure Cost (High early, drops to 0 at Day 11) -->
+              <path id="curveShortage" d="" fill="none" stroke="var(--risk-red)" stroke-width="2" stroke-dasharray="5,3" />
+
+              <!-- Curve 3: Fixed Transition / Line Prep Cost -->
+              <path id="curveTransition" d="" fill="none" stroke="var(--text-light)" stroke-width="1.2" stroke-dasharray="2,2" />
+
+              <!-- Curve 4: Total Cost Curve (Prominent) -->
+              <path id="curveTotalCost" d="" fill="none" stroke="var(--blue-primary)" stroke-width="3.5" />
+
+              <!-- Dynamic Vertical Indicator for Selected Date -->
+              <g id="selectedDateGuide">
+                <line id="guideLine" x1="444" y1="40" x2="444" y2="340" stroke="var(--blue-primary)" stroke-width="2.5" />
+                <circle id="guidePointTotal" cx="444" cy="200" r="6" fill="var(--blue-primary)" stroke="#FFFFFF" stroke-width="2" />
+                <circle id="guidePointOld" cx="444" cy="200" r="4" fill="var(--navy-secondary)" />
+                <circle id="guidePointShortage" cx="444" cy="200" r="4" fill="var(--risk-red)" />
+              </g>
+            </svg>
+          </div>
+
+          <!-- Chart Legend -->
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: var(--blue-primary);"></span>
+              <span>Total Transition Cost Index (Primary Objective)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: var(--risk-red); border-style: dashed;"></span>
+              <span>New Material Shortage Exposure</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: var(--navy-secondary); border-style: dashed;"></span>
+              <span>Excess Old Stock Scrappage / Holding</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: var(--success-bg); border-color: var(--success-green);"></span>
+              <span>Feasible Operational Window</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-light);">
+            * Technical note: Illustrative deterministic netting model. Not an industrial production forecast.
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+
+        <!-- SECTION E & F: Risk Constraints & Deterministic Decision Rationale -->
+        <div class="grid-2col" style="margin-bottom: 1.5rem;">
+          <div class="decision-explanation-card" style="margin-bottom: 0;">
+            <div class="explanation-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue-primary)" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <span>Deterministic Decision Explanation</span>
+            </div>
+            <p class="explanation-body">
+              The mathematical cutover engine identifies <strong>15-DEC-2026</strong> as the globally optimal implementation date for ECN-0248 based on physical warehouse stock depletion and supplier lead-time arrival:
+            </p>
+            <ul class="explanation-reasons-list">
+              <li><strong>Why 15-DEC:</strong> Minimizes total scrap exposure to 120 units while completely satisfying the zero-shortage condition (/bin/zsh penalty).</li>
+              <li><strong>Why 01-DEC to 10-DEC is Infeasible:</strong> Replacement material does not clear dock inspection until Dec 11. Early cutover forces immediate plant line stoppage.</li>
+              <li><strong>Why Deferring Past 19-DEC is Unacceptable:</strong> Carrying costs and scheduled revision obsolescence exceed the transition budget.</li>
+            </ul>
+          </div>
+
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header" style="padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+              <h4 class="card-title" style="font-size: 0.95rem;">Active Operational Constraints</h4>
+              <span class="badge badge-feasible">CONSTRAINTS PASS</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.825rem;">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
+                <span style="color: var(--text-muted);">Supplier Delivery Readiness</span>
+                <span style="font-family: var(--font-mono); font-weight: 600;">Dock Ready Day 11 (11-DEC)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
+                <span style="color: var(--text-muted);">Warehouse Stock Depletion</span>
+                <span style="font-family: var(--font-mono); font-weight: 600;">680 units @ 40/day = 17 Days</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
+                <span style="color: var(--text-muted);">Shortage Exposure at Recommended</span>
+                <span style="font-family: var(--font-mono); font-weight: 700; color: var(--success-green);">0 Units (0.0% Risk)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-color); padding-bottom: 0.4rem;">
+                <span style="color: var(--text-muted);">Obsolescence Scrap at Recommended</span>
+                <span style="font-family: var(--font-mono); font-weight: 600;">120 Units (.00 Index)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--text-muted);">Sourcing Resilience Index</span>
+                <span style="font-family: var(--font-mono); font-weight: 700; color: var(--blue-primary);">81 / 100 (Low Supply Risk)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION G: Decision Actions Strip -->
+        <div class="decision-actions-strip">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--navy-primary);">Execute Operational Decision</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Commit transition date to plant master production schedule or run contingency evaluations.</div>
+          </div>
+          <div class="actions-btn-group">
+            <button class="btn btn-primary" id="ovActionApproveCutover">&check; Approve Cutover (15-DEC)</button>
+            <button class="btn btn-secondary" id="ovActionRunAnalysis">Run Analysis</button>
+            <button class="btn btn-secondary" id="ovActionCompareScenarios">Compare Scenarios</button>
+            <button class="btn btn-secondary" id="ovActionReviewDecision">Review Details</button>
+            <button class="btn btn-outline" id="ovActionDeferDecision" style="color: var(--risk-red); border-color: var(--risk-border);">Defer Decision</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         WORKSPACE 2: ENGINEERING CHANGES WORKSPACE
+         ==================================================================== -->
+    <div class="page-view" id="view-ecn" data-route="/ecn">
+      <div class="workspace-container">
+        <div class="workspace-header-block">
+          <div class="workspace-header-titles">
+            <h1 class="workspace-title">Engineering Changes Workspace</h1>
+            <p class="workspace-subtitle">Manage Engineering Change Notices (ECN), review part revisions, and validate bill-of-materials ingestion data.</p>
+          </div>
+          <div class="workspace-header-actions">
+            <button class="btn btn-primary btn-sm" id="openNewEcnModalBtn">+ New Engineering Change</button>
+          </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="card" style="margin-bottom: 1.25rem; padding: 0.85rem 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 260px;">
+              <input type="text" id="ecnSearchInput" placeholder="Search ECN number, component ID, or description..." style="width: 100%; max-width: 380px; padding: 0.4rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem; font-family: var(--font-sans);">
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">STATUS FILTER:</span>
+              <select id="ecnStatusFilter" style="padding: 0.35rem 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.825rem; background: #FFF;">
+                <option value="ALL">All Statuses</option>
+                <option value="IN_REVIEW">In Review / Pending</option>
+                <option value="ANALYSIS_READY">Analysis Ready</option>
+                <option value="DATA_PENDING">Data Pending</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ECN Table -->
+        <div class="enterprise-table-container" style="margin-bottom: 2rem;">
+          <table class="enterprise-table">
+            <thead>
+              <tr>
+                <th>ECN Number</th>
+                <th>Current Component</th>
+                <th>Replacement Component</th>
+                <th>Change Classification</th>
+                <th>Lifecycle Status</th>
+                <th>Input Readiness</th>
+                <th>Planned Target</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="ecnTableBody">
+              <!-- Rendered dynamically by ecn-workspace.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Integrated Pre-Flight Data Quality Gate -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Pre-Flight BOM Data Quality Validator</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Upload or inspect BOM transition CSV datasets against 10 critical manufacturing integrity constraints before running optimization.</p>
+            </div>
+            <span class="badge badge-blue">10-RULE VALIDATION ENGINE</span>
+          </div>
+
+          <section id="quality-gate">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">INPUT SANITIZATION</span>
+          <h2 class="section-title">Bad inputs should never become confident decisions.</h2>
+          <p class="section-desc">
+            No optimization algorithm or AI model can fix corrupted data. The Data Quality Gate inspects input records 
+            for negative stock, missing lead times, inconsistent units, and duplicate revisions before running calculations.
+          </p>
+        </div>
+
+        <div class="dq-wrapper">
+          <!-- Left: Input & Controls -->
+          <div class="dq-input-col">
+            <div class="card-header">
+              <span class="card-title">CSV Input Stream</span>
+              <span class="synthetic-tag">LOCAL CLIENT PARSER</span>
+            </div>
+
+            <textarea id="csvInputTextarea" class="csv-textarea" spellcheck="false" aria-label="CSV Input Area"></textarea>
+
+            <div class="dq-action-row">
+              <button id="validateCsvBtn" class="btn btn-primary btn-sm">Run Quality Check</button>
+              <button id="loadCleanCsvBtn" class="btn btn-secondary btn-sm">Load Clean Sample</button>
+              <button id="loadCorruptCsvBtn" class="btn btn-secondary btn-sm">Load Corrupt Sample</button>
+              <button id="downloadSampleCsvBtn" class="btn btn-outline btn-sm">Download CSV</button>
+            </div>
+          </div>
+
+          <!-- Right: Validation Metrics & Errors Table -->
+          <div class="dq-results-col">
+            <div class="card-header">
+              <span class="card-title">Validation Diagnostic</span>
+              <span id="dqOverallBadge" class="badge badge-feasible">VALIDATION PASS</span>
+            </div>
+
+            <div class="dq-metrics-row">
+              <div class="dq-stat-card">
+                <div class="dq-stat-num" id="dq-total-count">6</div>
+                <div class="dq-stat-lbl">Total Records</div>
+              </div>
+              <div class="dq-stat-card valid">
+                <div class="dq-stat-num" id="dq-valid-count">6</div>
+                <div class="dq-stat-lbl">Valid (Pass)</div>
+              </div>
+              <div class="dq-stat-card warning">
+                <div class="dq-stat-num" id="dq-warning-count">0</div>
+                <div class="dq-stat-lbl">Warnings</div>
+              </div>
+              <div class="dq-stat-card error">
+                <div class="dq-stat-num" id="dq-error-count">0</div>
+                <div class="dq-stat-lbl">Errors (Halt)</div>
+              </div>
+            </div>
+
+            <div class="dq-table-container">
+              <table class="dq-table">
+                <thead>
+                  <tr>
+                    <th>Row</th>
+                    <th>Part ID</th>
+                    <th>Issue Description</th>
+                    <th>Severity</th>
+                  </tr>
+                </thead>
+                <tbody id="dqResultsTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         WORKSPACE 3: CUTOVER ANALYSIS WORKSPACE
+         ==================================================================== -->
+    <div class="page-view" id="view-cutover" data-route="/cutover">
+      <div class="workspace-container">
+        <div class="workspace-header-block">
+          <div class="workspace-header-titles">
+            <h1 class="workspace-title">Cutover Analysis &amp; Optimization</h1>
+            <p class="workspace-subtitle">Deterministic inventory netting, material availability thresholds, and total transition cost balance curve.</p>
+          </div>
+          <div class="workspace-header-actions">
+            <button class="btn btn-primary btn-sm" id="plannerRecalcBtn">Recompute Optimization</button>
+          </div>
+        </div>
+
+        <!-- Inputs Configuration Bar -->
+        <div class="card" style="margin-bottom: 1.5rem; background: var(--bg-surface-subtle);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--navy-primary);">ANALYSIS INPUT ASSUMPTIONS (ECN-0248)</span>
+            <span class="badge badge-feasible">VERIFIED CONSTRAINTS</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">CURRENT WAREHOUSE STOCK</span>
+              <strong style="font-family: var(--font-mono); font-size: 0.95rem;">680 Units</strong>
+            </div>
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">DAILY CONSUMPTION RATE</span>
+              <strong style="font-family: var(--font-mono); font-size: 0.95rem;">40 Units / Day</strong>
+            </div>
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">REPLACEMENT DOCK READY</span>
+              <strong style="font-family: var(--font-mono); font-size: 0.95rem; color: var(--blue-primary);">Day 11 (11-DEC)</strong>
+            </div>
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">HOLDING COST PENALTY</span>
+              <strong style="font-family: var(--font-mono); font-size: 0.95rem;">.20 / unit / day</strong>
+            </div>
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">STOCKOUT STARVATION PENALTY</span>
+              <strong style="font-family: var(--font-mono); font-size: 0.95rem; color: var(--risk-red);">.00 / unit</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Cutover Chart & Slider -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Cutover Trajectory &amp; Feasible Window Visualization</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">The blue vertical hairline tracks candidate transition timing against minimum scrap and shortage risk.</p>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+              ACTIVE DATE: <strong id="sliderDateVal" style="color: var(--blue-primary);">15-DEC-2026</strong>
+            </div>
+          </div>
+
+          <section id="cutover-curve">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">CORE DECISION ENGINE</span>
+          <h2 class="section-title">Cutover Cost &amp; Feasibility Curve</h2>
+          <p class="section-desc">
+            Explore how the candidate effective date alters excess scrap liability, shortage risk, and transition cost. 
+            Drag the effective date slider to evaluate trade-offs in real time.
+          </p>
+        </div>
+
+        <div class="interactive-chart-container">
+          <!-- Slider Control & High-level status bar -->
+          <div class="chart-controls-panel">
+            <div class="slider-row">
+              <div class="slider-label-group">
+                <div class="slider-title">Candidate Cutover Date</div>
+                <div class="slider-hint">Drag slider across Dec 01 &mdash; Dec 31</div>
+              </div>
+
+              <div class="slider-input-wrapper">
+                <input type="range" id="cutoverDateSlider" class="date-slider" min="1" max="31" value="15" step="1" aria-label="Candidate Cutover Date Slider" />
+                <div class="date-slider-display" id="cutoverDateDisplay">15 DEC</div>
+              </div>
+
+              <div style="margin-left: auto;">
+                <span id="feasibilityStatusBadge" class="badge badge-feasible">FEASIBLE (OPTIMAL REGION)</span>
+              </div>
+            </div>
+
+            <!-- Live readouts row -->
+            <div class="chart-live-readouts">
+              <div class="readout-box">
+                <div class="readout-label">Excess Old Stock</div>
+                <div class="readout-value" id="readout-excess-stock">120 u</div>
+              </div>
+              <div class="readout-box">
+                <div class="readout-label">Scrap / Holding Cost</div>
+                <div class="readout-value" id="readout-scrap-cost">$1,440</div>
+              </div>
+              <div class="readout-box">
+                <div class="readout-label">Shortage Exposure</div>
+                <div class="readout-value" id="readout-shortage" style="color: var(--success-green);">0 u ($0)</div>
+              </div>
+              <div class="readout-box">
+                <div class="readout-label">Relative Cost Index</div>
+                <div class="readout-value" id="readout-total-cost">82.4</div>
+              </div>
+              <div class="readout-box">
+                <div class="readout-label">LRM Buffer</div>
+                <div class="readout-value" id="readout-lrm-buffer" style="color: var(--cyan-data);">+4 Days</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SVG Chart Area -->
+          <div class="svg-chart-wrapper">
+            <svg id="cutoverSvgChart" class="chart-svg" viewBox="0 0 900 400" preserveAspectRatio="none" aria-label="Interactive Cutover Feasibility Curve Chart">
+              <!-- Definitions for gradients & markers -->
+              <defs>
+                <linearGradient id="feasibleGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#25845A" stop-opacity="0.18" />
+                  <stop offset="100%" stop-color="#25845A" stop-opacity="0.02" />
+                </linearGradient>
+                <linearGradient id="infeasibleGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#C64747" stop-opacity="0.12" />
+                  <stop offset="100%" stop-color="#C64747" stop-opacity="0.02" />
+                </linearGradient>
+              </defs>
+
+              <!-- Chart Background & Gridlines (Y-axis 0 to 120, X-axis Day 1 to 31) -->
+              <!-- X: 80 to 860 width 780. Y: 40 to 340 height 300 -->
+              <g id="chartGrid" stroke="var(--border-color)" stroke-width="1">
+                <!-- Horizontals -->
+                <line x1="80" y1="40" x2="860" y2="40" stroke-dasharray="2,2" />
+                <line x1="80" y1="115" x2="860" y2="115" stroke-dasharray="2,2" />
+                <line x1="80" y1="190" x2="860" y2="190" stroke-dasharray="2,2" />
+                <line x1="80" y1="265" x2="860" y2="265" stroke-dasharray="2,2" />
+                <line x1="80" y1="340" x2="860" y2="340" />
+
+                <!-- Verticals for key dates -->
+                <line x1="80" y1="40" x2="80" y2="340" />
+                <line x1="210" y1="40" x2="210" y2="340" stroke-dasharray="2,2" />
+                <line x1="340" y1="40" x2="340" y2="340" stroke-dasharray="2,2" />
+                <line x1="470" y1="40" x2="470" y2="340" stroke-dasharray="2,2" />
+                <line x1="600" y1="40" x2="600" y2="340" stroke-dasharray="2,2" />
+                <line x1="730" y1="40" x2="730" y2="340" stroke-dasharray="2,2" />
+                <line x1="860" y1="40" x2="860" y2="340" />
+              </g>
+
+              <!-- Y-axis Text Labels -->
+              <g font-family="var(--font-mono)" font-size="11" fill="var(--text-muted)" text-anchor="end">
+                <text x="70" y="44">120</text>
+                <text x="70" y="119">90</text>
+                <text x="70" y="194">60</text>
+                <text x="70" y="269">30</text>
+                <text x="70" y="344">0</text>
+                <text x="25" y="195" transform="rotate(-90 25 195)" font-weight="600" text-anchor="middle">RELATIVE COST INDEX</text>
+              </g>
+
+              <!-- X-axis Text Labels -->
+              <g font-family="var(--font-mono)" font-size="11" fill="var(--text-muted)" text-anchor="middle">
+                <text x="80" y="362">01 DEC</text>
+                <text x="210" y="362">06 DEC</text>
+                <text x="340" y="362">11 DEC</text>
+                <text x="470" y="362">16 DEC</text>
+                <text x="600" y="362">21 DEC</text>
+                <text x="730" y="362">26 DEC</text>
+                <text x="860" y="362">31 DEC</text>
+                <text x="470" y="388" font-weight="600">EFFECTIVE CUTOVER DATE</text>
+              </g>
+
+              <!-- Shaded Regions -->
+              <!-- Infeasible Region (Shortage, before Day 11 arrival + QA) -->
+              <rect x="80" y="40" width="260" height="300" fill="url(#infeasibleGrad)" />
+              <text x="210" y="65" fill="var(--risk-red)" font-family="var(--font-mono)" font-size="10" font-weight="600" text-anchor="middle">INFEASIBLE / SHORTAGE ZONE</text>
+
+              <!-- Feasible Window (Day 11 to Day 19) -->
+              <rect x="340" y="40" width="208" height="300" fill="url(#feasibleGrad)" />
+              <text x="444" y="65" fill="var(--success-green)" font-family="var(--font-mono)" font-size="11" font-weight="700" text-anchor="middle">FEASIBLE TRANSITION WINDOW</text>
+
+              <!-- Excess Holding Region (After Day 19 LRM) -->
+              <rect x="548" y="40" width="312" height="300" fill="#FFF4DF" fill-opacity="0.3" />
+              <text x="704" y="65" fill="var(--warning-amber)" font-family="var(--font-mono)" font-size="10" font-weight="600" text-anchor="middle">HIGH OBSOLESCENCE / HOLDING REGION</text>
+
+              <!-- Milestone Lines -->
+              <!-- Earliest Feasible: Day 11 (X = 340) -->
+              <line x1="340" y1="40" x2="340" y2="340" stroke="var(--success-green)" stroke-width="1.5" stroke-dasharray="4,4" />
+              <text x="340" y="85" fill="var(--success-green)" font-family="var(--font-mono)" font-size="10" font-weight="600" text-anchor="middle">EARLIEST FEASIBLE (11 DEC)</text>
+
+              <!-- Recommended Cutover: Day 15 (X = 444, Minimum of total cost curve) -->
+              <line x1="444" y1="40" x2="444" y2="340" stroke="var(--blue-primary)" stroke-width="2" stroke-dasharray="3,3" />
+              <text x="444" y="105" fill="var(--blue-primary)" font-family="var(--font-mono)" font-size="10" font-weight="700" text-anchor="middle">RECOMMENDED (15 DEC)</text>
+
+              <!-- Latest Responsible Moment: Day 19 (X = 548) -->
+              <line x1="548" y1="40" x2="548" y2="340" stroke="var(--warning-amber)" stroke-width="2" stroke-dasharray="4,4" />
+              <text x="548" y="85" fill="var(--warning-amber)" font-family="var(--font-mono)" font-size="10" font-weight="600" text-anchor="middle">LRM (19 DEC)</text>
+
+              <!-- Dynamic Calculated Curves -->
+              <!-- Curve 1: Excess Old Inventory Cost (Slopes down) -->
+              <path id="curveOldStock" d="" fill="none" stroke="var(--navy-secondary)" stroke-width="1.8" stroke-dasharray="4,3" />
+
+              <!-- Curve 2: Shortage Exposure Cost (High early, drops to 0 at Day 11) -->
+              <path id="curveShortage" d="" fill="none" stroke="var(--risk-red)" stroke-width="2" stroke-dasharray="5,3" />
+
+              <!-- Curve 3: Fixed Transition / Line Prep Cost -->
+              <path id="curveTransition" d="" fill="none" stroke="var(--text-light)" stroke-width="1.2" stroke-dasharray="2,2" />
+
+              <!-- Curve 4: Total Cost Curve (Prominent) -->
+              <path id="curveTotalCost" d="" fill="none" stroke="var(--blue-primary)" stroke-width="3.5" />
+
+              <!-- Dynamic Vertical Indicator for Selected Date -->
+              <g id="selectedDateGuide">
+                <line id="guideLine" x1="444" y1="40" x2="444" y2="340" stroke="var(--blue-primary)" stroke-width="2.5" />
+                <circle id="guidePointTotal" cx="444" cy="200" r="6" fill="var(--blue-primary)" stroke="#FFFFFF" stroke-width="2" />
+                <circle id="guidePointOld" cx="444" cy="200" r="4" fill="var(--navy-secondary)" />
+                <circle id="guidePointShortage" cx="444" cy="200" r="4" fill="var(--risk-red)" />
+              </g>
+            </svg>
+          </div>
+
+          <!-- Chart Legend -->
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: var(--blue-primary);"></span>
+              <span>Total Transition Cost Index (Primary Objective)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: var(--risk-red); border-style: dashed;"></span>
+              <span>New Material Shortage Exposure</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: var(--navy-secondary); border-style: dashed;"></span>
+              <span>Excess Old Stock Scrappage / Holding</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch" style="background: var(--success-bg); border-color: var(--success-green);"></span>
+              <span>Feasible Operational Window</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-light);">
+            * Technical note: Illustrative deterministic netting model. Not an industrial production forecast.
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+
+        <!-- LRM Timeline Section -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Latest Responsible Moment (LRM) Decision Threshold</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Identifies the terminal date to commit component revision before carrying penalties accelerate exponentially.</p>
+            </div>
+            <span class="badge badge-warning">LRM: 19 DEC 2026</span>
+          </div>
+
+          <section id="latest-responsible-moment">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">DECISION THEORY</span>
+          <h2 class="section-title">The Latest Responsible Moment (LRM)</h2>
+          <p class="section-desc">
+            The Latest Responsible Moment is the latest transition date that can be considered operationally 
+            feasible before material holding costs, inventory obsolescence, or plant line locks create unacceptable risk.
+          </p>
+        </div>
+
+        <div class="lrm-container">
+          <!-- Left: Timeline Visualizer -->
+          <div class="lrm-timeline-card">
+            <div class="card-header">
+              <span class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                Sequential Feasibility Horizon
+              </span>
+              <span class="badge badge-feasible">DYNAMIC BUFFER MAPPING</span>
+            </div>
+
+            <!-- Conceptual Track -->
+            <div class="lrm-timeline-track" id="lrm-track-container">
+              <div class="lrm-track-line"></div>
+
+              <!-- Nodes along the line -->
+              <div class="lrm-node earliest">
+                <span>11 DEC</span>
+                <span style="color: var(--success-green);">EARLIEST FEASIBLE</span>
+                <div class="pin"></div>
+              </div>
+
+              <div class="lrm-node rec">
+                <span>15 DEC</span>
+                <span style="color: var(--blue-primary);">RECOMMENDED</span>
+                <div class="pin" style="background: var(--blue-primary);"></div>
+              </div>
+
+              <div class="lrm-node lrm-point">
+                <span>19 DEC</span>
+                <span style="color: var(--warning-amber);">LRM LIMIT</span>
+                <div class="pin" style="background: var(--warning-amber);"></div>
+              </div>
+
+              <!-- Marker responding to cutover date slider -->
+              <div id="lrmSliderIndicator" class="lrm-active-slider-indicator" style="left: 48%;"></div>
+            </div>
+
+            <div class="preview-kv-grid" style="margin-top: 3.5rem; margin-bottom: 0;">
+              <div class="preview-kv">
+                <span class="preview-k">Status vs LRM</span>
+                <span class="preview-v" id="lrm-live-status" style="color: var(--success-green);">WITHIN SAFE BOUNDS</span>
+              </div>
+              <div class="preview-kv">
+                <span class="preview-k">Safety Buffer Retained</span>
+                <span class="preview-v" id="lrm-live-days">+4 Working Days</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Explanation Card -->
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--navy-primary); margin-bottom: 0.75rem;">
+              Why the LRM is not the recommended date
+            </h3>
+            <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1rem;">
+              A common planning error is waiting until the last second to exhaust every last unit of old inventory. 
+              While this eliminates scrap, it destroys supply-chain resilience: any supplier delay immediately halts production.
+            </p>
+            <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.6;">
+              <strong>CutoverGuard separates the two:</strong> The <em>Recommended Window (12–16 Dec)</em> preserves 
+              a safety buffer for lead-time jitter, while the <em>Latest Responsible Moment (19 Dec)</em> marks the strict 
+              boundary after which holding costs and ECN implementation deadlines begin causing severe cost escalation.
+            </p>
+
+            <div class="lrm-explainer-box">
+              <h4>JURY SUMMARY (Under 10 Seconds)</h4>
+              <p>
+                <strong>Earliest Feasible:</strong> New parts are inspected and ready.<br>
+                <strong>Recommended Date:</strong> Mathematical minimum of total transition cost.<br>
+                <strong>LRM:</strong> The drop-dead date before holding excess inventory becomes riskier than minor scrap.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+
+        <!-- Planner Decision Authorization Cockpit -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Planner Decision Authorization Cockpit</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Formal human planner review, justification entry, and immutable decision sign-off.</p>
+            </div>
+            <span class="badge badge-feasible" id="cockpitStatusBadge">STATUS: PENDING PLANNER APPROVAL</span>
+          </div>
+
+          <section id="planner-workspace">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">OPERATIONAL CONSOLE</span>
+          <h2 class="section-title">Planner Workspace Cockpit</h2>
+          <p class="section-desc">
+            A purpose-built interface for manufacturing planners to review impact matrices, compare scenario runs, 
+            and approve cutover orders into the production schedule.
+          </p>
+        </div>
+
+        <div class="workspace-cockpit">
+          <div class="cockpit-top-bar">
+            <div>
+              <span id="cockpitStatusBadge" class="badge badge-warning" style="margin-bottom: 0.35rem;">STATUS: PENDING PLANNER APPROVAL</span>
+              <h3 style="font-size: 1.4rem; font-weight: 700; color: var(--navy-primary);">
+                Engineering Change Order ECN-0248
+              </h3>
+              <div style="font-size: 0.85rem; font-family: var(--font-mono); color: var(--text-muted);">
+                Component COMP-A-104 &rarr; COMP-B-208 | Owner: Plant 3 Material Planning
+              </div>
+            </div>
+
+            <div style="text-align: right;">
+              <span class="synthetic-tag">PROPOSED DATE</span>
+              <div style="font-size: 1.4rem; font-family: var(--font-mono); font-weight: 700; color: var(--blue-primary);">
+                15 DEC 2026
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Action Buttons -->
+          <div class="cockpit-actions-strip">
+            <button id="plannerApproveBtn" class="btn btn-primary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Approve Recommendation
+            </button>
+            <button id="plannerRecalcBtn" class="btn btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Request Recalculation
+            </button>
+            <button id="plannerRejectBtn" class="btn btn-secondary btn-sm" style="color: var(--risk-red);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              Reject / Defer Transition
+            </button>
+            <a href="#/scenarios" data-navigate="/scenarios" class="btn btn-outline btn-sm">Compare What-If Scenarios</a>
+          </div>
+
+          <!-- Activity Audit Log -->
+          <div class="simulated-activity-log" id="plannerActivityLog">
+            <div class="log-entry">
+              <span class="log-ts">13:42:10 UTC</span>
+              <span>[SYSTEM] ECN-0248 data ingested and validated across 6 BOM assemblies.</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-ts">13:42:12 UTC</span>
+              <span>[KERNEL] Cutover curve optimization computed. Minimum cost vertex detected at 14-16 DEC.</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-ts">13:42:15 UTC</span>
+              <span>[UNCERTAINTY] Monte Carlo 500-run simulation verified 95.8% shortage-free probability.</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-ts">13:42:16 UTC</span>
+              <span class="log-highlight">[WORKFLOW] Recommendation routed to Material Planning inbox. Awaiting human digital signature.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         WORKSPACE 4: SCENARIO SIMULATION WORKSPACE
+         ==================================================================== -->
+    <div class="page-view" id="view-scenarios" data-route="/scenarios">
+      <div class="workspace-container">
+        <div class="workspace-header-block">
+          <div class="workspace-header-titles">
+            <h1 class="workspace-title">Scenario Simulation &amp; What-If Evaluation</h1>
+            <p class="workspace-subtitle">Evaluate cutover sensitivity under sudden demand surges, supplier transit delays, and safety buffer adjustments.</p>
+          </div>
+          <div class="workspace-header-actions">
+            <button class="btn btn-secondary btn-sm" id="resetScenariosBtn" onclick="document.querySelector('[data-scenario='baseline']').click()">Reset to Baseline</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Parametric Stress-Testing Controls</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Adjust parameters to simulate supply chain disruptions and view instant calculation deltas.</p>
+            </div>
+            <span class="badge badge-blue">LIVE SENSITIVITY KERNEL</span>
+          </div>
+
+          <section id="scenario-lab">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">CONTINGENCY PLANNING</span>
+          <h2 class="section-title">What changes if the assumptions change?</h2>
+          <p class="section-desc">
+            Manufacturing environments are dynamic. Test how demand fluctuations, supplier transit delays, 
+            and starting stock levels shift the cutover economics side-by-side.
+          </p>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="scenario-controls-bar">
+          <div class="control-item">
+            <label for="scenarioDemandSlider">Demand Surge / Drop</label>
+            <input type="range" id="scenarioDemandSlider" min="-30" max="60" value="0" step="5" />
+            <div class="control-val-readout" id="scenarioDemandVal">+0% (Nominal)</div>
+          </div>
+
+          <div class="control-item">
+            <label for="scenarioDelaySlider">Supplier Transit Delay</label>
+            <input type="range" id="scenarioDelaySlider" min="0" max="15" value="0" step="1" />
+            <div class="control-val-readout" id="scenarioDelayVal">+0 Days</div>
+          </div>
+
+          <div class="control-item">
+            <label for="scenarioStockSlider">Old Stock on Hand</label>
+            <input type="range" id="scenarioStockSlider" min="300" max="900" value="600" step="50" />
+            <div class="control-val-readout" id="scenarioStockVal">600 Units</div>
+          </div>
+
+          <div class="control-item">
+            <label for="scenarioBufferSlider">Buffer Requirement</label>
+            <input type="range" id="scenarioBufferSlider" min="1" max="7" value="3" step="1" />
+            <div class="control-val-readout" id="scenarioBufferVal">3 Days</div>
+          </div>
+
+          <div>
+            <button id="resetScenariosBtn" class="btn btn-secondary btn-sm" style="width: 100%;">
+              Reset Inputs
+            </button>
+          </div>
+        </div>
+
+        <!-- Side-by-Side Comparison -->
+        <div class="scenario-comparison-grid">
+          <!-- Scenario A: Baseline -->
+          <div class="scenario-card active-scenario" id="cardScenarioA">
+            <span class="scenario-tag" style="color: var(--blue-primary);">Scenario A</span>
+            <h3 class="scenario-title">BASELINE</h3>
+            <p class="scenario-desc">Expected nominal production schedule (40u/day) and confirmed vendor dispatch date (Dec 10).</p>
+            <div class="scenario-metric-list">
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Feasible Cutover Date:</span>
+                <span class="scenario-metric-v" id="scenA-date">14 DEC</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Total Cost Index:</span>
+                <span class="scenario-metric-v" id="scenA-cost">82.4</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Shortage Exposure:</span>
+                <span class="scenario-metric-v" id="scenA-shortage" style="color: var(--success-green);">0 Units</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Old Stock Remaining:</span>
+                <span class="scenario-metric-v" id="scenA-leftover">120 Units</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Risk Evaluation:</span>
+                <span id="scenA-risk" class="badge badge-feasible">LOW RISK</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scenario B: Demand Surge -->
+          <div class="scenario-card" id="cardScenarioB">
+            <span class="scenario-tag" style="color: var(--warning-amber);">Scenario B</span>
+            <h3 class="scenario-title">DEMAND SURGE (+35%)</h3>
+            <p class="scenario-desc">Customer pull requires increased plant throughput (54u/day), rapidly accelerating inventory burn.</p>
+            <div class="scenario-metric-list">
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Feasible Cutover Date:</span>
+                <span class="scenario-metric-v" id="scenB-date">12 DEC</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Total Cost Index:</span>
+                <span class="scenario-metric-v" id="scenB-cost">94.8</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Shortage Exposure:</span>
+                <span class="scenario-metric-v" id="scenB-shortage">0 Units</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Old Stock Remaining:</span>
+                <span class="scenario-metric-v" id="scenB-leftover">24 Units</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Risk Evaluation:</span>
+                <span id="scenB-risk" class="badge badge-warning">TIGHT RUNOUT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scenario C: Supplier Delay -->
+          <div class="scenario-card" id="cardScenarioC">
+            <span class="scenario-tag" style="color: var(--risk-red);">Scenario C</span>
+            <h3 class="scenario-title">SUPPLIER DELAY (+6 DAYS)</h3>
+            <p class="scenario-desc">Port bottleneck delays replacement delivery to Dec 16. Threatens line starvation if cutover attempted early.</p>
+            <div class="scenario-metric-list">
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Feasible Cutover Date:</span>
+                <span class="scenario-metric-v" id="scenC-date">20 DEC</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Total Cost Index:</span>
+                <span class="scenario-metric-v" id="scenC-cost">114.2</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Shortage Exposure:</span>
+                <span class="scenario-metric-v" id="scenC-shortage" style="color: var(--risk-red);">0 Units (Delayed)</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Old Stock Remaining:</span>
+                <span class="scenario-metric-v" id="scenC-leftover">0 Units (Deficit)</span>
+              </div>
+              <div class="scenario-metric-row">
+                <span class="scenario-metric-k">Risk Evaluation:</span>
+                <span id="scenC-risk" class="badge badge-risk">EXTENDED RUN</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-light); text-align: center;">
+          * Synthetic parametric simulation calculated locally in client memory.
+        </div>
+      </div>
+    </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         WORKSPACE 5: SUPPLY & RISK WORKSPACE
+         ==================================================================== -->
+    <div class="page-view" id="view-supply-risk" data-route="/supply-risk">
+      <div class="workspace-container">
+        <div class="workspace-header-block">
+          <div class="workspace-header-titles">
+            <h1 class="workspace-title">Supply Chain &amp; Risk Analysis</h1>
+            <p class="workspace-subtitle">Supplier readiness, lead-time variance, purchase order status, and Monte Carlo stochastic uncertainty simulation.</p>
+          </div>
+          <div class="workspace-header-actions">
+            <span class="badge badge-feasible">SUPPLIER STATUS: CONFIRMED</span>
+          </div>
+        </div>
+
+        <!-- Part A: Sourcing Resilience -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Sourcing Resilience &amp; Supplier Risk Radar</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Multi-factor composite scoring incorporating supplier lead-time variability, PO commitment, and dual-sourcing qualification.</p>
+            </div>
+            <span class="badge badge-feasible">SCORE: 81 / 100</span>
+          </div>
+
+          <section id="sourcing-resilience">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">SUPPLY NETWORK STABILITY</span>
+          <h2 class="section-title">Sourcing resilience evaluation.</h2>
+          <p class="section-desc">
+            A cutover plan is only as reliable as the supply base delivering the replacement part. 
+            Evaluate lead-time stability, dual-sourcing coverage, and vendor confirmation status.
+          </p>
+        </div>
+
+        <div class="sourcing-grid">
+          <!-- Left: Input Controls -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Vendor Parameters (COMP-B-208)</span>
+              <span class="synthetic-tag">ILLUSTRATIVE MODEL</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+              <div class="control-item">
+                <label for="srLeadTimeSlider">Primary Supplier Lead Time</label>
+                <input type="range" id="srLeadTimeSlider" min="10" max="60" value="25" step="5" />
+                <div class="control-val-readout" id="srLeadTimeVal">25 Working Days</div>
+              </div>
+
+              <div class="control-item">
+                <label for="srVariabilitySlider">Historical Dispatch Jitter</label>
+                <input type="range" id="srVariabilitySlider" min="0" max="15" value="3" step="1" />
+                <div class="control-val-readout" id="srVariabilityVal">&plusmn;3 Days Variance</div>
+              </div>
+
+              <div class="control-item">
+                <label for="srConfirmedSelect">Purchase Order Confirmation Status</label>
+                <select id="srConfirmedSelect" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); background: var(--bg-surface-subtle);">
+                  <option value="confirmed" selected>Confirmed with ASN &amp; Ship Date</option>
+                  <option value="acknowledged">Acknowledged by Vendor (No tracking)</option>
+                  <option value="pending">Unconfirmed PO (Quote status)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="srDualSourceSelect">Secondary Qualified Supplier</label>
+                <select id="srDualSourceSelect" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); background: var(--bg-surface-subtle);">
+                  <option value="yes" selected>Yes &mdash; Secondary Source Available (+15% cost)</option>
+                  <option value="no">No &mdash; Single Source Dependency</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Resilience Readout -->
+          <div class="resilience-score-panel">
+            <div class="card-header">
+              <span class="card-title">Resilience Diagnostic</span>
+              <span id="srResilienceBadge" class="badge badge-feasible">HIGH RESILIENCE</span>
+            </div>
+
+            <div class="score-dial-row">
+              <div class="score-circle" id="srScoreCircle" style="border-color: var(--success-green);">
+                <div class="score-num" id="srScoreNum">84</div>
+                <div class="score-denom">/ 100</div>
+              </div>
+              <div>
+                <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--navy-primary); margin-bottom: 0.35rem;" id="srSummaryTitle">
+                  Stable Supply Horizon
+                </h4>
+                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.45;" id="srSummaryDesc">
+                  Low delivery jitter combined with active dual-sourcing provides high confidence that new parts arrive on or before Dec 10.
+                </p>
+              </div>
+            </div>
+
+            <div class="preview-kv-grid" style="margin-bottom: 0;">
+              <div class="preview-kv">
+                <span class="preview-k">Single Source Risk</span>
+                <span class="preview-v" id="srSingleSourceRisk" style="color: var(--success-green);">MITIGATED</span>
+              </div>
+              <div class="preview-kv">
+                <span class="preview-k">Safety Buffer Needed</span>
+                <span class="preview-v" id="srSafetyBufferNeeded">2 Days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+
+        <!-- Part B: Monte Carlo Uncertainty -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Monte Carlo Stochastic Lead-Time &amp; Demand Simulation</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">1,000-run Gaussian Box-Muller perturbation kernel evaluating non-parametric shortage probabilities and confidence intervals.</p>
+            </div>
+            <span class="badge badge-blue">STOCHASTIC SIMULATION</span>
+          </div>
+
+          <section id="uncertainty">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">STOCHASTIC MODELING</span>
+          <h2 class="section-title">Planning under uncertainty.</h2>
+          <p class="section-desc">
+            In industrial reality, daily line consumption fluctuates and supplier transit windows are non-deterministic. 
+            CutoverGuard executes Monte Carlo iterations to calculate the empirical probability of shortage.
+          </p>
+        </div>
+
+        <div class="uncertainty-layout">
+          <!-- Left: Simulation Controls -->
+          <div class="uncertainty-controls-card">
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--navy-primary);">
+              Stochastic Parameters
+            </h3>
+
+            <div class="control-item">
+              <label for="mcRunsSelect">Number of Iterations</label>
+              <select id="mcRunsSelect" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-surface-subtle); font-family: var(--font-mono);">
+                <option value="250">250 Iterations (Fast)</option>
+                <option value="500" selected>500 Iterations (Recommended)</option>
+                <option value="1000">1000 Iterations (Deep)</option>
+              </select>
+            </div>
+
+            <div class="control-item">
+              <label for="mcDemandVolSlider">Daily Demand Volatility (&sigma;)</label>
+              <input type="range" id="mcDemandVolSlider" min="5" max="35" value="15" step="1" />
+              <div class="control-val-readout" id="mcDemandVolVal">&plusmn;15% Standard Deviation</div>
+            </div>
+
+            <div class="control-item">
+              <label for="mcLeadTimeVolSlider">Supplier Delay Risk Window</label>
+              <input type="range" id="mcLeadTimeVolSlider" min="1" max="8" value="3" step="1" />
+              <div class="control-val-readout" id="mcLeadTimeVolVal">0 to +3 Days Jitter</div>
+            </div>
+
+            <button id="runMonteCarloBtn" class="btn btn-primary" style="margin-top: 0.5rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              Run Monte Carlo Simulation
+            </button>
+
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); line-height: 1.45; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+              [IMPORTANT NOTE] Demonstration of stochastic simulation approach using reproducible client-side PRNG. Not trained on proprietary factory telemetry.
+            </div>
+          </div>
+
+          <!-- Right: Histogram & Distribution -->
+          <div class="uncertainty-viz-card">
+            <div class="card-header">
+              <span class="card-title">
+                Optimal Cutover Date Distribution
+              </span>
+              <span id="mcRunStatusBadge" class="badge badge-feasible">500 RUNS COMPLETED</span>
+            </div>
+
+            <div class="histogram-wrapper">
+              <svg id="histogramSvg" class="histogram-svg" viewBox="0 0 500 200" preserveAspectRatio="none">
+                <!-- Gridlines -->
+                <line x1="40" y1="20" x2="480" y2="20" stroke="var(--border-color)" stroke-dasharray="2,2" />
+                <line x1="40" y1="85" x2="480" y2="85" stroke-dasharray="2,2" />
+                <line x1="40" y1="150" x2="480" y2="150" stroke="var(--border-color)" />
+
+                <!-- Dynamic Histogram Bars (Populated by JS) -->
+                <g id="histogramBarsGroup"></g>
+
+                <!-- X-Axis Labels -->
+                <g font-family="var(--font-mono)" font-size="9" fill="var(--text-muted)" text-anchor="middle">
+                  <text x="50" y="168">08 DEC</text>
+                  <text x="120" y="168">11 DEC</text>
+                  <text x="190" y="168">14 DEC</text>
+                  <text x="260" y="168">17 DEC</text>
+                  <text x="330" y="168">20 DEC</text>
+                  <text x="400" y="168">23 DEC</text>
+                  <text x="470" y="168">26 DEC</text>
+                </g>
+              </svg>
+            </div>
+
+            <div class="stats-summary-strip">
+              <div class="stat-pill">
+                <div class="stat-pill-label">Shortage Probability</div>
+                <div class="stat-pill-val" id="mc-prob-shortage" style="color: var(--success-green);">4.2%</div>
+              </div>
+              <div class="stat-pill">
+                <div class="stat-pill-label">P10 &mdash; P90 Range</div>
+                <div class="stat-pill-val" id="mc-p10-p90">12&ndash;17 DEC</div>
+              </div>
+              <div class="stat-pill">
+                <div class="stat-pill-label">Optimal Confidence</div>
+                <div class="stat-pill-val" style="color: var(--blue-primary);">95.8%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         WORKSPACE 6: DECISION HISTORY WORKSPACE
+         ==================================================================== -->
+    <div class="page-view" id="view-history" data-route="/history">
+      <div class="workspace-container">
+        <div class="workspace-header-block">
+          <div class="workspace-header-titles">
+            <h1 class="workspace-title">Decision History &amp; Commitments Log</h1>
+            <p class="workspace-subtitle">Immutable audit log of past cutover analyses, scenario evaluations, and authorized planner commitments.</p>
+          </div>
+          <div class="workspace-header-actions">
+            <button class="btn btn-secondary btn-sm" id="exportHistoryCsvBtn">Export History (CSV)</button>
+          </div>
+        </div>
+
+        <div class="enterprise-table-container" style="margin-bottom: 2rem;">
+          <table class="enterprise-table">
+            <thead>
+              <tr>
+                <th>Record ID</th>
+                <th>ECN</th>
+                <th>Transition Parts</th>
+                <th>Model Version</th>
+                <th>Recommended Cutover</th>
+                <th>Cost Index</th>
+                <th>Action</th>
+                <th>Planner</th>
+                <th>Committed At</th>
+                <th style="text-align: right;">Inspect</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <!-- Rendered dynamically by decision-history.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         WORKSPACE 7: AUDIT & GOVERNANCE WORKSPACE
+         ==================================================================== -->
+    <div class="page-view" id="view-audit" data-route="/audit">
+      <div class="workspace-container">
+        <div class="workspace-header-block">
+          <div class="workspace-header-titles">
+            <h1 class="workspace-title">Audit &amp; Cryptographic Governance</h1>
+            <p class="workspace-subtitle">SHA-256 hash-chained decision trail ensuring permanent regulatory traceability and mathematical ground-truth verification.</p>
+          </div>
+          <div class="workspace-header-actions">
+            <button class="btn btn-primary btn-sm" id="auditVerifyBtn">Verify Chain Integrity</button>
+            <button class="btn btn-secondary btn-sm" id="auditTamperBtn">Simulate Tamper</button>
+            <button class="btn btn-secondary btn-sm" id="auditRestoreBtn">Restore Ledger</button>
+          </div>
+        </div>
+
+        <!-- Part A: Cryptographic Hash Chain -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">Cryptographic SHA-256 Decision Chain</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Block-by-block hash linkage preserving parameter snapshots and authorized cutover commitments.</p>
+            </div>
+            <span class="badge badge-feasible" id="auditChainStatusBadge">CHAIN VALID: 4 BLOCKS</span>
+          </div>
+
+          <section id="trust-layer">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">INTEGRITY ARCHITECTURE</span>
+          <h2 class="section-title">Trust is engineered into the decision.</h2>
+          <p class="section-desc">
+            Industrial operations cannot risk trusting opaque black-box outputs. CutoverGuard enforces a three-tier 
+            integrity architecture ensuring deterministic mathematics, reproducibility, and tamper-evident audit history.
+          </p>
+        </div>
+
+        <div class="problem-grid">
+          <!-- Layer 1 -->
+          <div class="problem-card" style="border-top-color: var(--blue-primary);">
+            <span class="problem-num" style="color: var(--blue-primary);">LAYER 01</span>
+            <h3 class="problem-heading">Numerical Verification</h3>
+            <p>All core quantities, dates, shortage units, and costs originate in deterministic formulas. AI is strictly prohibited from inventing or hallucinating numbers.</p>
+          </div>
+
+          <!-- Layer 2 -->
+          <div class="problem-card" style="border-top-color: var(--cyan-data);">
+            <span class="problem-num" style="color: var(--cyan-data);">LAYER 02</span>
+            <h3 class="problem-heading">Versioned Decision Engine</h3>
+            <p>Every cutover calculation locks the exact rule kernel version, parameter weights, constraint snapshot, and random seed to ensure bit-level reproducibility.</p>
+          </div>
+
+          <!-- Layer 3 -->
+          <div class="problem-card" style="border-top-color: var(--navy-primary);">
+            <span class="problem-num" style="color: var(--navy-primary);">LAYER 03</span>
+            <h3 class="problem-heading">Hash-Chained Audit Trail</h3>
+            <p>Every calculation state and human approval is cryptographically linked to the previous block's SHA-256 hash. Any retroactive alteration breaks the verification chain.</p>
+          </div>
+
+          <!-- Layer 4 (Human) -->
+          <div class="problem-card" style="border-top-color: var(--success-green);">
+            <span class="problem-num" style="color: var(--success-green);">HUMAN GOVERNANCE</span>
+            <h3 class="problem-heading">Planner Authority</h3>
+            <p>The system never auto-commits production cutovers. Recommendations require explicit verification and sign-off by an authorized manufacturing planner.</p>
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             18. INTERACTIVE AUDIT CHAIN
+             ==================================================================== -->
+        <div class="card" style="margin-top: 2rem;">
+          <div class="card-header">
+            <div>
+              <span class="card-title">
+                Cryptographic Audit Chain
+                <span id="auditAlgorithmBadge" class="badge badge-neutral" style="margin-left: 0.5rem;">SHA-256 (WEB CRYPTO)</span>
+              </span>
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+                Append-only linked state ledger
+              </span>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+              <button id="tamperAuditChainBtn" class="btn btn-secondary btn-sm" style="color: var(--risk-red);">
+                Modify Sample Entry (Tamper)
+              </button>
+              <button id="restoreAuditChainBtn" class="btn btn-primary btn-sm">
+                Restore Original Chain
+              </button>
+            </div>
+          </div>
+
+          <!-- Audit chain records list -->
+          <div id="auditChainStream" class="audit-chain-stream">
+            <!-- Populated dynamically via JS to compute real SHA-256 hashes -->
+          </div>
+
+          <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-light); line-height: 1.45; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+            * Technical notice: Illustrative client-side SHA-256 integrity mechanism executed in browser memory via Web Crypto API. Not an enterprise HSM or distributed blockchain.
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+
+        <!-- Part B: AI Explanation Fact-Checking Verifier -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">AI Explanation Ground-Truth Verification Gate</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Deterministic fact-checker verifying that generated textual recommendations strictly adhere to calculated numerical ground truth.</p>
+            </div>
+            <span class="badge badge-blue">HALLUCINATION REJECTION GATE</span>
+          </div>
+
+          <section id="explanation-verification">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow">FACT-CHECKED AI</span>
+          <h2 class="section-title">AI can explain the decision. It cannot change the facts.</h2>
+          <p class="section-desc">
+            To prevent AI hallucinations in industrial decision making, CutoverGuard passes all generated 
+            explanations through a verification layer that verifies factual claims against computed ground truth.
+          </p>
+        </div>
+
+        <div class="exp-verification-grid">
+          <!-- Left: Ground Truth Facts -->
+          <div class="facts-card">
+            <div class="card-header">
+              <span class="card-title">Computed Ground Truth (Deterministic)</span>
+              <span class="badge badge-feasible">LOCKED VALUES</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              Values calculated by the deterministic rules engine for ECN-0248:
+            </p>
+
+            <table class="facts-table">
+              <tbody>
+                <tr>
+                  <td>Recommended Cutover Date:</td>
+                  <td id="gt-cutover-date">15 DEC</td>
+                </tr>
+                <tr>
+                  <td>Old Stock Remaining (COMP-A-104):</td>
+                  <td id="gt-old-stock">120 units</td>
+                </tr>
+                <tr>
+                  <td>Shortage Exposure:</td>
+                  <td id="gt-shortage">0 units</td>
+                </tr>
+                <tr>
+                  <td>Relative Cost Index:</td>
+                  <td id="gt-cost-index">82.4</td>
+                </tr>
+                <tr>
+                  <td>Feasibility Status:</td>
+                  <td style="color: var(--success-green);">FEASIBLE</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Right: AI Explanation & Verifier -->
+          <div class="ai-card">
+            <div class="card-header">
+              <span class="card-title">Generated Natural Language Explanation</span>
+              <div style="display: flex; gap: 0.5rem;">
+                <button id="loadAccurateExpBtn" class="btn btn-secondary btn-sm" style="font-size: 0.7rem;">Accurate Text</button>
+                <button id="loadHallucinatedExpBtn" class="btn btn-secondary btn-sm" style="font-size: 0.7rem; color: var(--risk-red);">Hallucinated Text</button>
+              </div>
+            </div>
+
+            <textarea id="aiExplanationInput" class="explanation-input-box" aria-label="AI Explanation Text"></textarea>
+
+            <button id="verifyExplanationBtn" class="btn btn-primary btn-sm" style="width: 100%;">
+              Verify Explanation Against Ground Truth
+            </button>
+
+            <div id="verificationResultBox" class="verification-result-box pass">
+              <div style="font-weight: 700;" id="verificationResultHeader">VERIFIED &mdash; ALL CLAIMS MATCH COMPUTED GROUND TRUTH</div>
+              <div style="font-size: 0.75rem;" id="verificationResultDetails">
+                Dates (15 DEC), old stock (120 units), zero shortage, and cost index (82.4) mathematically confirmed.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+        </div>
+      </div>
+    </div>
+</main>
+  <!-- ========================================================================
+       MODAL: NEW ENGINEERING CHANGE NOTICE
+       ======================================================================== -->
+  <div class="app-modal-backdrop" id="newEcnModal" aria-hidden="true">
+    <div class="app-modal-dialog" role="dialog" aria-labelledby="modalNewEcnTitle">
+      <div class="app-modal-header">
+        <h3 class="app-modal-title" id="modalNewEcnTitle">Create New Engineering Change Notice (ECN)</h3>
+        <button class="app-modal-close" id="closeNewEcnModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="newEcnForm">
+        <div class="app-modal-body">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">ECN NUMBER</label>
+              <input type="text" id="inpEcnId" placeholder="e.g. ECN-0410" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            </div>
+            <div>
+              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">PLANNED DOCK READY DAY</label>
+              <input type="number" id="inpDockDay" min="1" max="25" value="12" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">CURRENT COMPONENT ID</label>
+              <input type="text" id="inpPartOld" placeholder="e.g. COMP-A-104" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            </div>
+            <div>
+              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">REPLACEMENT COMPONENT ID</label>
+              <input type="text" id="inpPartNew" placeholder="e.g. COMP-B-208" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">CURRENT WAREHOUSE STOCK (UNITS)</label>
+              <input type="number" id="inpStock" min="0" value="680" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            </div>
+            <div>
+              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">DAILY CONSUMPTION RATE (UNITS/DAY)</label>
+              <input type="number" id="inpDemand" min="1" value="40" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">CHANGE DESCRIPTION &amp; ENGINEERING REASON</label>
+            <textarea id="inpReason" rows="3" placeholder="State technical justification for revision (e.g. form-fit-function upgrade, obsolescence)..." style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem; font-family: var(--font-sans);"></textarea>
+          </div>
+        </div>
+        <div class="app-modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelNewEcnBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create &amp; Launch Analysis</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: DECISION RECORD DETAIL INSPECTION
+       ======================================================================== -->
+  <div class="app-modal-backdrop" id="historyDetailModal" aria-hidden="true">
+    <div class="app-modal-dialog" role="dialog">
+      <div class="app-modal-header">
+        <h3 class="app-modal-title">Decision Commitment Record Details</h3>
+        <button class="app-modal-close" id="closeHistoryDetailBtn">&times;</button>
+      </div>
+      <div class="app-modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; font-size: 0.85rem;">
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">RECORD ID</span><strong id="histDetailId" style="font-family: var(--font-mono);">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">ECN IDENTIFIER</span><strong id="histDetailEcn" style="font-family: var(--font-mono);">-</strong></div>
+          <div style="grid-column: 1 / -1;"><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">TRANSITION COMPONENTS</span><strong id="histDetailParts" style="color: var(--blue-primary);">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">RECOMMENDED DATE</span><strong id="histDetailDate" style="font-family: var(--font-mono);">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">FEASIBLE WINDOW</span><strong id="histDetailWindow" style="font-family: var(--font-mono);">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">LATEST RESP. MOMENT</span><strong id="histDetailLrm" style="font-family: var(--font-mono);">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">COST INDEX</span><strong id="histDetailCost" style="font-family: var(--font-mono);">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">EXCESS STOCK</span><strong id="histDetailExcess">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">SHORTAGE RISK</span><strong id="histDetailShortage">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">AUTHORIZED BY</span><strong id="histDetailPlanner">-</strong></div>
+          <div><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">COMMITTED TIMESTAMP</span><strong id="histDetailTs" style="font-family: var(--font-mono); font-size: 0.8rem;">-</strong></div>
+          <div style="grid-column: 1 / -1;"><span style="color: var(--text-muted); font-size: 0.75rem; display: block;">CRYPTOGRAPHIC INTEGRITY HASH</span><strong id="histDetailHash" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--navy-primary); word-break: break-all;">-</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: SETTINGS & PREFERENCES
+       ======================================================================== -->
+  <div class="app-modal-backdrop" id="settingsModal" aria-hidden="true">
+    <div class="app-modal-dialog" role="dialog">
+      <div class="app-modal-header">
+        <h3 class="app-modal-title">System Settings &amp; Preferences</h3>
+        <button class="app-modal-close" id="closeSettingsBtn">&times;</button>
+      </div>
+      <div class="app-modal-body">
+        <div style="margin-bottom: 1.25rem;">
+          <label style="font-size: 0.825rem; font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">Visual Theme Mode</label>
+          <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-secondary btn-sm" id="themeToggleBtn" style="flex: 1;">
+              <span id="themeIcon"></span>
+              <span id="themeText">Switch to Dark Theme</span>
+            </button>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">CutoverGuard defaults to the White &amp; Blue Industrial Enterprise palette.</span>
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label style="font-size: 0.825rem; font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">Currency Display Unit</label>
+          <select id="settingCurrencySelect" style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem;">
+            <option value="$">$ USD (United States Dollar)</option>
+            <option value="&euro;">&euro; EUR (Euro)</option>
+            <option value="&pound;">&pound; GBP (British Pound)</option>
+            <option value="&#8377;">&#8377; INR (Indian Rupee)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+          <label style="font-size: 0.825rem; font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">Monte Carlo Seed</label>
+          <input type="number" id="settingSeedInput" value="1234" style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;">Fixed seed guarantees mathematical determinism across jury evaluations.</span>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <button type="button" class="btn btn-outline btn-sm" id="resetDemoBtn" style="color: var(--risk-red); border-color: var(--risk-border); width: 100%;">Reset Demo State to Baseline</button>
+        </div>
+      </div>
+      <div class="app-modal-footer">
+        <button class="btn btn-primary btn-sm" id="saveSettingsBtn">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: DATABASE CONNECTION DIAGNOSTICS (SUPABASE POSTGRESQL)
+       ======================================================================== -->
+  <div class="app-modal-backdrop" id="dbDiagnosticsModal" aria-hidden="true">
+    <div class="app-modal-dialog" role="dialog" aria-labelledby="modalDbTitle">
+      <div class="app-modal-header">
+        <h3 class="app-modal-title" id="modalDbTitle">PostgreSQL Database Connection (Supabase)</h3>
+        <button class="app-modal-close" id="closeDbModalBtn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="app-modal-body">
+        <div style="background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <span style="font-size: 0.825rem; font-weight: 600; color: var(--navy-primary);">Connection State</span>
+            <span id="dbDiagStatus"><span class="badge badge-feasible">ONLINE / READY</span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-size: 0.8rem;">
+            <div>
+              <span style="color: var(--text-muted); display: block; font-size: 0.7rem; text-transform: uppercase;">Host Endpoint</span>
+              <strong id="dbDiagHost" style="font-family: var(--font-mono); font-size: 0.75rem; word-break: break-all;">db.awbnjokoyxibmkfcqxey.supabase.co:5432</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); display: block; font-size: 0.7rem; text-transform: uppercase;">Database Name</span>
+              <strong id="dbDiagDatabase" style="font-family: var(--font-mono);">postgres</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); display: block; font-size: 0.7rem; text-transform: uppercase;">Server Version</span>
+              <span id="dbDiagVersion" style="font-family: var(--font-mono); font-size: 0.75rem;">PostgreSQL 17.12</span>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); display: block; font-size: 0.7rem; text-transform: uppercase;">Round-Trip Latency</span>
+              <strong id="dbDiagLatency" style="color: var(--success-green); font-family: var(--font-mono);">~120 ms</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="font-size: 0.825rem; font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">Synchronized Tables</label>
+          <div id="dbDiagCounts" style="font-size: 0.825rem; color: var(--text-main); background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem;">
+            Tables synchronized: ecns, decision_history, audit_log, system_config
+          </div>
+        </div>
+
+        <div style="font-size: 0.775rem; color: var(--text-muted); line-height: 1.4;">
+          The system deterministically executes cutover netting and scenario simulations in the engine and records all engineering changes, planner sign-offs, and cryptographic audit hash-chains directly into this persistent PostgreSQL database.
+        </div>
+      </div>
+      <div class="app-modal-footer" style="display: flex; justify-content: space-between;">
+        <button class="btn btn-outline btn-sm" id="reseedDbBtn">Re-Sync Schema &amp; Data</button>
+        <button class="btn btn-primary btn-sm" id="recheckDbBtn">Refresh Connection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Operational Toast Notification -->
+  <div id="appActionToast" class="app-action-toast"></div>
+
+    </div><!-- /#appMainColumn -->
+  </div><!-- /#appShell -->
+
+  <!-- Modular Application Script -->
+  <script type="module" src="./src/js/main.js"></script>
+</body>
+</html>

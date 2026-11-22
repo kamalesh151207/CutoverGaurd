@@ -1,0 +1,69 @@
+/* ==========================================================================
+   DESIGN TOKENS & SYSTEM VARIABLES — INDUSTRIAL ENTERPRISE SAAS
+   ========================================================================== */
+:root {
+  /* Canvas & Workspace */
+  --bg-page: #F5F7FB;
+  --bg-surface: #FFFFFF;
+  --bg-surface-alt: #EFF6FF;
+  --bg-surface-subtle: #F8FAFC;
+  --bg-surface-muted: #F1F5F9;
+
+  /* Brand & Core Blues */
+  --blue-primary: #2563EB;
+  --blue-hover: #1D4ED8;
+  --blue-deep: #1E40AF;
+  --blue-light: #EFF6FF;
+  --blue-border: #BFDBFE;
+  --blue-ring: rgba(37, 99, 235, 0.2);
+
+  /* Typography Colors */
+  --navy-primary: #172B4D;
+  --navy-secondary: #334155;
+  --text-main: #334155;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
+  --text-inverse: #FFFFFF;
+
+  /* Borders & Dividers */
+  --border-color: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --border-focus: #2563EB;
+
+  /* Status Semantics */
+  --success-green: #16A34A;
+  --success-bg: #F0FDF4;
+  --success-border: #BBF7D0;
+  --warning-amber: #F59E0B;
+  --warning-bg: #FFFBEB;
+  --warning-border: #FDE68A;
+  --risk-red: #DC2626;
+  --risk-bg: #FEF2F2;
+  --risk-border: #FECACA;
+
+  /* Data Accents */
+  --cyan-data: #0284C7;
+  --cyan-subtle: #E0F2FE;
+
+  /* Typography */
+  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', Menlo, Consolas, Monaco, monospace;
+
+  /* Layout & Elevations */
+  --max-width: 1400px;
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  --shadow-subtle: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-hover: 0 3px 8px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
+  --shadow-drawer: 2px 0 12px rgba(15, 23, 42, 0.06);
+
+  --transition-fast: 0.15s ease-in-out;
+  --transition-normal: 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  --header-height: 52px;
+  --sidebar-width-expanded: 240px;
+  --sidebar-width-collapsed: 64px;
+}

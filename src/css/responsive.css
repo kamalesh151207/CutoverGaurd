@@ -1,0 +1,49 @@
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES & BREAKPOINTS — INDUSTRIAL ENTERPRISE SAAS
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+  .grid-4col { grid-template-columns: repeat(2, 1fr); }
+  .grid-3col { grid-template-columns: repeat(2, 1fr); }
+  .grid-2col { grid-template-columns: 1fr; }
+  .chart-live-readouts { grid-template-columns: repeat(3, 1fr); }
+  .scenario-controls-bar { grid-template-columns: repeat(2, 1fr); }
+  .scenario-comparison-grid { grid-template-columns: 1fr; }
+  .uncertainty-layout { grid-template-columns: 1fr; }
+  .sourcing-grid { grid-template-columns: 1fr; }
+  .exp-verification-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .workspace-container { padding: 1rem 0.85rem 2.5rem; }
+  .container { padding-left: 0.85rem; padding-right: 0.85rem; }
+  .grid-4col { grid-template-columns: 1fr; }
+  .grid-3col { grid-template-columns: 1fr; }
+  .grid-2col { grid-template-columns: 1fr; }
+  .input-readiness-grid { grid-template-columns: repeat(2, 1fr); }
+  .chart-live-readouts { grid-template-columns: 1fr 1fr; }
+  .top-disclosure { flex-direction: column; gap: 0.25rem; text-align: center; }
+  .slider-row { flex-direction: column; align-items: stretch; gap: 0.75rem; }
+  .slider-label-group { min-width: 0; width: 100%; }
+  .slider-input-wrapper { min-width: 0; width: 100%; }
+  .scenario-controls-bar { grid-template-columns: 1fr; }
+  .cockpit-top-bar { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .decision-actions-strip { flex-direction: column; align-items: stretch; }
+  .actions-btn-group { flex-direction: column; width: 100%; }
+  .actions-btn-group .btn { width: 100%; }
+  .active-ecn-pill .pill-parts { display: none; }
+  .header-brand-logo { height: 34px; max-width: 120px; }
+  .sidebar-brand-logo { width: 200px; max-width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .chart-live-readouts { grid-template-columns: 1fr; }
+  .input-readiness-grid { grid-template-columns: 1fr; }
+  .score-dial-row { flex-direction: column; text-align: center; }
+  .active-ecn-pill { padding: 0.2rem 0.45rem; font-size: 0.7rem; }
+  .header-brand-logo { height: 30px; max-width: 100px; }
+  .sidebar-brand-logo { width: 190px; max-width: 100%; }
+  .header-breadcrumbs .crumb-sep,
+  .header-breadcrumbs #headerBreadcrumbCurrent { font-size: 0.75rem; }
+}

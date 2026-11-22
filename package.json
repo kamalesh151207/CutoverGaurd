@@ -1,0 +1,27 @@
+{
+  "name": "cutoverguard",
+  "version": "1.0.0",
+  "description": "AI-assisted Engineering Change Management & Risk-Aware Material Cutover Decision System",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "node --check src/js/main.js"
+  },
+  "keywords": [
+    "engineering-change-management",
+    "cutover-optimization",
+    "material-management",
+    "industrial-engineering",
+    "supply-chain-risk",
+    "monte-carlo-simulation",
+    "decision-intelligence"
+  ],
+  "author": "CutoverGuard Project Team",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^18.0.10",
+    "pg": "^8.23.1"
+  }
+}

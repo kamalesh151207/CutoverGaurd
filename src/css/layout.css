@@ -1,0 +1,236 @@
+/* ==========================================================================
+   LAYOUT STRUCTURE & WORKSPACE CONTAINERS — INDUSTRIAL ENTERPRISE SAAS
+   ========================================================================== */
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body.drawer-open {
+  overflow: hidden;
+}
+
+/* App Shell Layout */
+.app-shell {
+  display: flex;
+  min-height: calc(100vh - var(--header-height));
+  width: 100%;
+  position: relative;
+  background-color: var(--bg-page);
+  align-items: stretch;
+}
+
+.app-main-column {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-page);
+  overflow-x: hidden;
+  transition: all var(--transition-normal);
+}
+
+main#app-main {
+  flex: 1 0 auto;
+  min-width: 0;
+}
+
+.workspace-container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.25rem 1.75rem 3rem;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Page Views */
+.page-view {
+  display: none;
+}
+
+.page-view.active-page {
+  display: block;
+  animation: pageFadeIn 0.15s ease-out;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Workspace Header Block */
+.workspace-header-block {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.workspace-header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.workspace-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--navy-primary);
+  letter-spacing: -0.015em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.workspace-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.workspace-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Operational Grid Layouts */
+.grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.grid-4col {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+/* Data Table Component */
+.enterprise-table-container {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow-x: auto;
+}
+
+.enterprise-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.enterprise-table th {
+  background: var(--bg-surface-subtle);
+  color: var(--navy-primary);
+  font-family: var(--font-mono);
+  font-size: 0.725rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.enterprise-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.enterprise-table tr:last-child td {
+  border-bottom: none;
+}
+
+.enterprise-table tbody tr:hover {
+  background-color: var(--bg-surface-subtle);
+}
+
+.enterprise-table tbody tr.active-row {
+  background-color: var(--blue-light);
+}
+
+/* Metric Readout Card */
+.metric-stat-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.metric-stat-card:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--blue-border);
+}
+
+.metric-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.metric-stat-value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--navy-primary);
+  line-height: 1.1;
+  font-family: var(--font-mono);
+}
+
+.metric-stat-subtext {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+/* Shared Sections */
+section {
+  padding: 1rem 0;
+  position: relative;
+}
