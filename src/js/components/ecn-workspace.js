@@ -4,6 +4,8 @@ import { getState, setState } from '../core/state.js';
 import { EventBus } from '../core/event-bus.js';
 import { router } from '../core/router.js';
 import { dbService } from '../services/db-service.js';
+import { ecnIntelligenceService } from '../services/ecn-intelligence-service.js';
+import { bomModel } from '../models/bom-model.js';
 
 export function initEcnWorkspace() {
   const ecnTableBody = document.getElementById('ecnTableBody');
@@ -182,17 +184,50 @@ export function initEcnWorkspace() {
     });
   }
 
-  // Submit synthetic ECN form
+  // Auto-fill component inventory & dock day when typing/selecting components in modal
+  const inpPartOld = document.getElementById('inpPartOld');
+  const inpPartNew = document.getElementById('inpPartNew');
+  const inpStock = document.getElementById('inpStock');
+  const inpDemand = document.getElementById('inpDemand');
+  const inpDockDay = document.getElementById('inpDockDay');
+
+  if (inpPartOld) {
+    inpPartOld.addEventListener('change', () => {
+      const comp = bomModel.getComponent(inpPartOld.value.trim());
+      const impact = bomModel.analyzeComponentImpact(inpPartOld.value.trim());
+      if (inpStock && comp.onHand) inpStock.value = comp.onHand;
+      if (inpDemand && impact.totalDailyDemand) inpDemand.value = impact.totalDailyDemand;
+    });
+  }
+  if (inpPartNew) {
+    inpPartNew.addEventListener('change', () => {
+      const compNew = bomModel.getComponent(inpPartNew.value.trim());
+      if (inpDockDay && compNew.dockDay) inpDockDay.value = compNew.dockDay;
+    });
+  }
+
+  // Submit automated ECN form
   if (newEcnForm) {
     newEcnForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const formId = document.getElementById('inpEcnId').value.trim() || `ECN-0${Math.floor(Math.random() * 800 + 200)}`;
-      const partOld = document.getElementById('inpPartOld').value.trim() || 'COMP-OLD-01';
-      const partNew = document.getElementById('inpPartNew').value.trim() || 'COMP-NEW-02';
+      const partOld = document.getElementById('inpPartOld').value.trim() || 'COMP-A-104';
+      const partNew = document.getElementById('inpPartNew').value.trim() || 'COMP-B-208';
       const reason = document.getElementById('inpReason').value.trim() || 'Engineering specification update';
-      const stock = parseInt(document.getElementById('inpStock').value, 10) || 500;
-      const demand = parseInt(document.getElementById('inpDemand').value, 10) || 35;
-      const dockDay = parseInt(document.getElementById('inpDockDay').value, 10) || 12;
+      const stock = parseInt(document.getElementById('inpStock').value, 10) || 680;
+      const demand = parseInt(document.getElementById('inpDemand').value, 10) || 40;
+      const dockDay = parseInt(document.getElementById('inpDockDay').value, 10) || 11;
+
+      // Automated ECN Analysis Pipeline
+      const analysis = ecnIntelligenceService.analyzeEcn({
+        id: formId,
+        partOld,
+        partNew,
+        initialStock: stock,
+        dailyDemand: demand,
+        dockDay,
+        reason
+      });
 
       const newRecord = {
         id: formId,
@@ -201,25 +236,27 @@ export function initEcnWorkspace() {
         revision: 'Rev A → Rev B',
         changeType: 'Form-Fit-Function Revision',
         reason,
-        createdDate: '2026-11-22',
-        plannedDate: `${dockDay + 4}-DEC-2026`,
+        createdDate: new Date().toISOString().slice(0, 10),
+        plannedDate: analysis.optimization.recommendedDate,
         initialStock: stock,
         dailyDemand: demand,
         dockDay,
-        status: 'Analysis Ready (User Created)',
+        status: 'Analysis Ready (Automated Pipeline)',
         statusCode: 'ANALYSIS_READY',
         readiness: 'READY',
+        analysis,
         inputs: {
-          inventory: { label: 'Inventory Balances', status: 'READY', detail: `${stock} units` },
-          bom: { label: 'BOM Structure', status: 'READY', detail: 'Single level' },
-          demand: { label: 'Demand Forecast', status: 'READY', detail: `${demand} units/day` },
-          materialReady: { label: 'Replacement Material', status: 'READY', detail: `Day ${dockDay}` },
-          leadTime: { label: 'Supplier Lead Time', status: 'READY', detail: '20 days' },
-          productionSchedule: { label: 'Plant Line Schedule', status: 'READY', detail: 'Confirmed' }
+          inventory: { label: 'Inventory Balances', status: 'READY', detail: `${stock} units on-hand (${analysis.inventory.available}u available)` },
+          bom: { label: 'BOM Structure', status: 'READY', detail: `${analysis.bomImpact.productCount} Finished Products Affected` },
+          demand: { label: 'Demand Forecast', status: 'READY', detail: `${demand} units/day combined` },
+          materialReady: { label: 'Replacement Material', status: 'READY', detail: `Dock ready Day ${dockDay}` },
+          leadTime: { label: 'Supplier Lead Time', status: 'READY', detail: `${analysis.inventory.leadTime} days confirmed PO` },
+          productionSchedule: { label: 'Plant Line Schedule', status: 'READY', detail: `${analysis.bomImpact.affectedLines.join(', ') || 'Line 3'} Active` }
         }
       };
 
       ecns.unshift(newRecord);
+      EventBus.emit('ecn:created', newRecord);
       // Persist to PostgreSQL database asynchronously
       dbService.createEcn(newRecord).catch(err => console.warn('Could not persist to DB:', err));
       closeModal();

@@ -13,6 +13,9 @@ import { DigitalTwinModel } from '../src/js/models/digital-twin-model.js';
 import { GuardrailsModel } from '../src/js/models/guardrails-model.js';
 import { CalculationService } from '../src/js/services/calculation-service.js';
 import { handleApiRequest } from '../src/api/routes.js';
+import { generateAccurateExplanation, generateHallucinatedExplanation, verifyExplanationClaims } from '../src/js/components/explanation-verifier.js';
+import { bomModel } from '../src/js/models/bom-model.js';
+import { ecnIntelligenceService } from '../src/js/services/ecn-intelligence-service.js';
 
 let passed = 0;
 let failed = 0;
@@ -142,6 +145,19 @@ const groundedExp = aiEngine.generateDecisionExplanation({ ...evalDay15, ...cost
 assert(groundedExp.includes('ECN-0248'), 'AI narrative references correct ECN ID');
 assert(groundedExp.includes('120 units'), 'AI narrative strictly reflects deterministic 120 units excess');
 assert(!groundedExp.includes('NaN'), 'AI narrative has no NaN values');
+
+// AI Verification Gate: Accurate vs Hallucinated Fact Checking
+const modelSnapshot = { day: 15, excessOldUnits: 120, shortageUnits: 0, totalIndex: 82.4, isFeasible: true };
+const activeEcn = { id: 'ECN-0248' };
+const accurateText = generateAccurateExplanation(activeEcn, modelSnapshot);
+const accurateVerification = verifyExplanationClaims(accurateText, modelSnapshot, activeEcn);
+assert(accurateVerification.isValid === true, 'AI Verification Gate: Accurate explanation VERIFIED');
+assert(accurateVerification.discrepancies.length === 0, 'AI Verification Gate: Zero factual discrepancies detected for accurate text');
+
+const hallucinatedText = generateHallucinatedExplanation(activeEcn, modelSnapshot);
+const hallucinatedVerification = verifyExplanationClaims(hallucinatedText, modelSnapshot, activeEcn);
+assert(hallucinatedVerification.isValid === false, 'AI Verification Gate: Hallucinated explanation BLOCKED');
+assert(hallucinatedVerification.discrepancies.length >= 3, `AI Verification Gate: Correctly isolated ${hallucinatedVerification.discrepancies.length} factual discrepancies in hallucinated text`);
 
 // Strategy Comparison
 const calcService = new CalculationService();
@@ -280,6 +296,75 @@ try {
 
 } catch (err) {
   console.error('API Test Error:', err);
+  failed++;
+}
+
+// -------------------------------------------------------------
+// TEST SUITE: MULTI-LEVEL BOM TRAVERSAL & AGGREGATE DEMAND
+// -------------------------------------------------------------
+console.log('\n--- Test Suite 9: Multi-Level BOM Traversal & Shared Components ---');
+try {
+  // Acyclic Dependency Check
+  const cycleResult = bomModel.detectCircularDependencies();
+  assert(cycleResult.hasCycle === false, 'BOM Graph is acyclic without circular dependency loops');
+  assert(cycleResult.visitedCount >= 4, `All top-level product structures validated (${cycleResult.visitedCount} nodes)`);
+
+  // Shared Component Impact Analysis (COMP-A-104)
+  const compImpact = bomModel.analyzeComponentImpact('COMP-A-104');
+  assert(compImpact.productCount === 2, 'COMP-A-104 impacts exactly 2 finished good product lines');
+  assert(compImpact.subassemblyCount === 2, 'COMP-A-104 traverses 2 intermediate subassemblies');
+  assert(compImpact.totalDailyDemand === 40, 'Multi-product aggregated daily demand equals exactly 40 units/day (15*2 + 10*1)');
+  assert(compImpact.isCommonComponent === true, 'COMP-A-104 flagged as common component shared across multiple lines');
+  assert(compImpact.affectedProducts.some(p => p.productId === 'PRD-EV-INVERTER-X1'), 'Includes PRD-EV-INVERTER-X1 at 30 units/day');
+  assert(compImpact.affectedProducts.some(p => p.productId === 'PRD-SERVO-DRIVE-S5'), 'Includes PRD-SERVO-DRIVE-S5 at 10 units/day');
+
+  // Single-product component impact
+  const valveImpact = bomModel.analyzeComponentImpact('VALVE-HYD-04');
+  assert(valveImpact.productCount === 1, 'VALVE-HYD-04 impacts 1 finished good product');
+  assert(valveImpact.totalDailyDemand === 25, 'VALVE-HYD-04 aggregated demand is 25 units/day');
+} catch (err) {
+  console.error('BOM Test Error:', err);
+  failed++;
+}
+
+// -------------------------------------------------------------
+// TEST SUITE: AUTOMATED ECN INTELLIGENCE PIPELINE
+// -------------------------------------------------------------
+console.log('\n--- Test Suite 10: Automatic ECN Intelligence & Optimization Pipeline ---');
+try {
+  const testEcn = {
+    id: 'ECN-0248',
+    title: 'MOSFET Power Stage Thermal Redesign',
+    partOld: 'COMP-A-104',
+    partNew: 'COMP-B-208',
+    plant: 'Plant 3 (Austin, TX)',
+    line: 'Line 3 (Powertrain Inverter)',
+    onHand: 680,
+    reserved: 80,
+    unitCost: 12.00,
+    replacementUnitCost: 14.50,
+    supplierLeadTimeDays: 10,
+    dailyConsumption: 40
+  };
+
+  const analysis = ecnIntelligenceService.analyzeEcn(testEcn);
+
+  // Validate optimization output
+  assert(analysis.optimization.recommendedDay === 15, 'ECN analysis recommends optimal cutover Day 15');
+  assert(analysis.optimization.recommendedDate === '15-DEC', 'ECN analysis maps Day 15 to 15-DEC calendar date');
+  assert(analysis.optimization.shortageDeficit === 0, 'Zero stockout shortage deficit at recommended cutover date');
+  assert(analysis.optimization.isFeasible === true, 'Recommended cutover passes all physical and supplier feasibility checks');
+  assert(analysis.optimization.feasibleRange === '11–19 DEC', 'Feasible cutover window correctly spans 11-DEC through 19-DEC');
+  assert(analysis.optimization.lrmDay === 19, 'Latest Responsible Moment calculated at Day 19 (19-DEC)');
+  assert(analysis.inventory.available === 600, 'Available stock correctly balances: onHand (680) - reserved (80) = 600');
+  assert(analysis.inventory.dockDay === 11, 'Replacement dock arrival calculated at Day 11 (PO Day 1 + 10-day lead time)');
+
+  // Validate narrative grounding
+  assert(analysis.narrative.summary.includes('15 DEC') || analysis.narrative.summary.includes('15-DEC'), 'Narrative summary explicitly references recommended date 15-DEC');
+  assert(analysis.narrative.summary.includes('120 units') || analysis.narrative.summary.includes('600'), 'Narrative summary cites exact physical inventory netting');
+  assert(Array.isArray(analysis.narrative.keyTakeaways) && analysis.narrative.keyTakeaways.length >= 3, 'Provides at least 3 structured engineering takeaways');
+} catch (err) {
+  console.error('ECN Intelligence Test Error:', err);
   failed++;
 }
 

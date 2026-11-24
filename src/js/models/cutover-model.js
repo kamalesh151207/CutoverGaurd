@@ -15,7 +15,7 @@ export class CutoverModel {
     this.baseDemand = Math.max(0, config.baseDemand !== undefined ? Number(config.baseDemand) : 40);
     this.initialOldStock = Math.max(0, config.initialOldStock !== undefined ? Number(config.initialOldStock) : 680);
     this.newMaterialReadyDay = Math.max(1, config.newMaterialReadyDay !== undefined ? Number(config.newMaterialReadyDay) : 11);
-    this.safetyBuffer = Math.max(0, config.safetyBuffer !== undefined ? Number(config.safetyBuffer) : 3);
+    this.safetyBuffer = Math.max(0, config.safetyBuffer !== undefined ? Number(config.safetyBuffer) : 2);
     this.unitHoldingScrapCost = Math.max(0, config.unitHoldingScrapCost !== undefined ? Number(config.unitHoldingScrapCost) : 12.0);
     this.unitShortageCost = Math.max(0, config.unitShortageCost !== undefined ? Number(config.unitShortageCost) : 35.0);
     this.fixedTransitionCost = config.fixedTransitionCost !== undefined ? Number(config.fixedTransitionCost) : 77.988;

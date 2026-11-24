@@ -24,6 +24,11 @@ import { initDigitalTwin } from './components/digital-twin.js';
 import { initParetoChart } from './components/pareto-chart.js';
 import { initCounterfactualExplorer } from './components/counterfactual-explorer.js';
 import { initDecisionReport } from './components/decision-report.js';
+import { initDashboardRecommendation } from './components/dashboard-recommendation.js';
+import { initBomImpact } from './components/bom-impact.js';
+import { initAiCopilot } from './components/ai-copilot.js';
+import { initMultiPlant } from './components/multi-plant.js';
+import { initProductionImpact } from './components/production-impact.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[CutoverGuard] Initializing enterprise decision workspaces...');
@@ -52,6 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initParetoChart(calculationService);
   initCounterfactualExplorer(calculationService);
   initDecisionReport(calculationService);
+  initDashboardRecommendation(calculationService);
+  initBomImpact(calculationService);
+  initAiCopilot(calculationService);
+  initMultiPlant(calculationService);
+  initProductionImpact(calculationService);
   initFaq();
 
   // 3. Initialize Router (activates default or deep-linked page view)

@@ -26,21 +26,30 @@ export class CalculationService {
 
     // Listen to active ECN changes
     EventBus.on('ecn:changed', (ecn) => {
-      this.reconfigure({
-        initialOldStock: ecn.initialStock,
-        baseDemand: ecn.dailyDemand,
-        newMaterialReadyDay: ecn.dockDay,
-        ecn: ecn.id,
-        partOld: ecn.partOld,
-        partNew: ecn.partNew
-      });
-      EventBus.emit('calculations:reconfigured', this.cutoverModel.getOptimizationSummary());
+      this.reconfigureWithEcn(ecn);
+    });
+
+    EventBus.on('ecn:created', (ecn) => {
+      this.reconfigureWithEcn(ecn);
     });
   }
 
   /**
    * Reconfigures optimization engines with new ECN parameters.
    */
+  reconfigureWithEcn(ecn) {
+    if (!ecn) return;
+    this.reconfigure({
+      initialOldStock: ecn.initialStock !== undefined ? Number(ecn.initialStock) : 680,
+      baseDemand: ecn.dailyDemand !== undefined ? Number(ecn.dailyDemand) : 40,
+      newMaterialReadyDay: ecn.dockDay !== undefined ? Number(ecn.dockDay) : 11,
+      ecn: ecn.id || 'ECN-0248',
+      partOld: ecn.partOld || 'COMP-A-104',
+      partNew: ecn.partNew || 'COMP-B-208'
+    });
+    EventBus.emit('calculations:reconfigured', this.cutoverModel.getOptimizationSummary());
+  }
+
   reconfigure(config = {}) {
     this.activeEcn = {
       ...this.activeEcn,

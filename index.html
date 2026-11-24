@@ -321,51 +321,103 @@
           <div class="card-header" style="padding-bottom: 0.75rem;">
             <div>
               <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                <span class="badge badge-feasible" id="ovGuardrailsHeaderBadge">5/5 GUARDRAILS PASSED</span>
-                <span class="badge badge-blue">ECN-0248 ACTIVE EVALUATION</span>
+                <span class="badge badge-feasible" id="ovFeasibilityBadge">FEASIBLE (OPTIMAL REGION)</span>
+                <span class="badge badge-blue" id="ovActiveEcnBadge">ECN-0248 (COMP-A-104 → COMP-B-208)</span>
+                <span class="badge badge-neutral" id="ovConfidenceDisplay" style="font-size: 0.65rem;">95.4% Certified Confidence</span>
               </div>
-              <h3 class="card-title" style="font-size: 1.15rem;">Executive Cutover Recommendation</h3>
-              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Deterministic material netting identifies <strong>15-DEC-2026</strong> as the global cost-minimum transition date with zero shortage exposure.</p>
+              <h3 class="card-title" style="font-size: 1.15rem;">Executive Recommended Cutover Date</h3>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;" id="ovRecommendationDesc">
+                Deterministic material netting calculates <strong id="ovRecDateText">15-DEC-2026</strong> as the global cost-minimum transition date with zero shortage exposure.
+              </p>
             </div>
             <div style="display: flex; gap: 0.5rem; align-items: center;">
-              <button class="btn btn-outline btn-sm" id="openReportModalBtn" style="font-size: 0.8rem;">Generate Report 📄</button>
+              <span id="ovTimestampDisplay" style="font-family: var(--font-mono); font-size: 0.725rem; color: var(--text-muted);">Calculated: Just now</span>
+              <button class="btn btn-outline btn-sm open-report-btn" id="openReportModalBtn" style="font-size: 0.8rem;">Generate Report 📄</button>
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; background: var(--bg-surface-subtle); border-radius: var(--radius-xs);">
-            <div style="padding-left: 1rem;">
-              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Optimal Transition Date</span>
-              <strong style="font-family: var(--font-mono); font-size: 1.25rem; color: var(--blue-primary);">15-DEC-2026</strong>
-              <div style="font-size: 0.725rem; color: var(--text-muted);">Optimal cost balance point</div>
+          <!-- Key Quantitative Metrics -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; padding: 1rem; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; background: var(--bg-surface-subtle); border-radius: var(--radius-xs);">
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Recommended Cutover Date</span>
+              <strong id="ovRecDateDisplay" style="font-family: var(--font-mono); font-size: 1.35rem; color: var(--blue-primary);">15-DEC-2026</strong>
+              <div style="font-size: 0.725rem; color: var(--text-muted);">Global cost balance vertex</div>
             </div>
             <div>
               <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Feasible Cutover Window</span>
-              <strong style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--navy-primary);">11 &ndash; 19 DEC</strong>
+              <strong id="ovFeasibleWindowDisplay" style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--navy-primary);">11 – 19 DEC</strong>
               <div style="font-size: 0.725rem; color: var(--success-green);">Zero shortage boundary</div>
             </div>
             <div>
-              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Transition Cost Index</span>
-              <strong style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--navy-primary);">82.4 pts</strong>
-              <div style="font-size: 0.725rem; color: var(--text-muted);">$1,440 scrap write-off (120u)</div>
-            </div>
-            <div style="padding-right: 1rem;">
               <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Latest Responsible Moment</span>
-              <strong style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--warning-amber);">19-DEC-2026</strong>
+              <strong id="ovLrmDisplay" style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--warning-amber);">19-DEC-2026</strong>
               <div style="font-size: 0.725rem; color: var(--text-muted);">+4 days safety buffer remaining</div>
+            </div>
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Old Stock at Cutover</span>
+              <strong id="ovOldStockDisplay" style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--navy-primary);">120 units ($1,440)</strong>
+              <div style="font-size: 0.725rem; color: var(--text-muted);">Controlled scrap liability</div>
+            </div>
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Replacement Availability</span>
+              <strong id="ovReplacementStockDisplay" style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--navy-primary);">800 units (Day 11)</strong>
+              <div style="font-size: 0.725rem; color: var(--success-green);">Confirmed PO dock-ready</div>
+            </div>
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Shortage Exposure</span>
+              <strong id="ovShortageDisplay" style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--success-green);">0 units</strong>
+              <div style="font-size: 0.725rem; color: var(--success-green);">100% Line continuity</div>
+            </div>
+            <div>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block; text-transform: uppercase;">Transition Cost Index</span>
+              <strong id="ovCostIndexDisplay" style="font-family: var(--font-mono); font-size: 1.15rem; color: var(--navy-primary);">82.4 pts</strong>
+              <div style="font-size: 0.725rem; color: var(--text-muted);">Baseline reference 100.0</div>
             </div>
           </div>
 
-          <!-- Strategy Breakdown Pills -->
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; font-size: 0.8rem;">
-            <div style="padding: 0.4rem 0.75rem; border: 1px solid var(--blue-primary); background: rgba(37, 99, 235, 0.04); border-radius: var(--radius-xs);">
-              <span style="color: var(--blue-primary); font-weight: 700;">Balanced Optimal:</span> 15-DEC (Cost: 82.4 &bull; Excess: 120u &bull; Shortage: 0%)
+          <!-- Visual Transition Timeline -->
+          <div style="padding: 0 0.5rem 0.5rem;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--navy-primary); text-transform: uppercase; margin-bottom: 0.35rem; display: flex; justify-content: space-between;">
+              <span>Sequential Transition Horizon &amp; Feasible Window Timeline</span>
+              <span style="color: var(--text-muted); font-family: var(--font-mono);">DAY 1 &mdash; DAY 31</span>
             </div>
-            <div style="padding: 0.4rem 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); border-radius: var(--radius-xs);">
-              <span style="color: var(--navy-primary); font-weight: 600;">Lowest Scrap:</span> 16-DEC (Cost: 83.8 &bull; Excess: 80u &bull; Shortage: 0%)
+            <div style="width: 100%; height: 90px; background: #FFF; border: 1px solid var(--border-color); border-radius: var(--radius-xs); overflow: hidden;">
+              <svg id="ovTimelineSvg" class="chart-svg" viewBox="0 0 860 90" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                <!-- Dynamically populated by dashboard-recommendation.js -->
+              </svg>
             </div>
-            <div style="padding: 0.4rem 0.75rem; border: 1px solid var(--border-color); background: var(--bg-surface); border-radius: var(--radius-xs);">
-              <span style="color: var(--navy-primary); font-weight: 600;">Earliest Dock Ready:</span> 11-DEC (Cost: 87.6 &bull; Excess: 280u &bull; Shortage: 0%)
+          </div>
+        </div>
+
+        <!-- SECTION D2: Multi-ECN Recommendation Summary Table -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-header" style="padding-bottom: 0.5rem;">
+            <div>
+              <h3 class="card-title" style="font-size: 1.05rem;">Active Engineering Changes Recommendation Matrix</h3>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0.2rem 0 0;">Unified cross-ECN cutover schedule generated by the deterministic optimization engine.</p>
             </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <input type="text" id="ovEcnSearchInput" placeholder="Filter ECNs or parts..." style="padding: 0.35rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-xs); font-size: 0.775rem;">
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="data-table" style="font-size: 0.8rem;">
+              <thead>
+                <tr>
+                  <th>ECN ID</th>
+                  <th>Component Transition</th>
+                  <th>Recommended Cutover</th>
+                  <th>Feasible Window</th>
+                  <th>Leftover Old Stock</th>
+                  <th>Shortage Exposure</th>
+                  <th>Status</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="ovEcnSummaryTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -680,6 +732,52 @@
         </div>
       </div>
     </section>
+
+        <!-- Section: Multi-Level BOM Impact Analysis -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <div class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="10" y1="6.5" x2="14" y2="6.5"></line><line x1="6.5" y1="10" x2="6.5" y2="14"></line><line x1="17.5" y1="10" x2="17.5" y2="14"></line></svg>
+                Multi-Level BOM Hierarchy &amp; Impact Analysis
+              </div>
+              <div class="card-subtitle">Recursive traversal across finished goods, subassemblies, and shared components to evaluate change propagation and demand aggregation.</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span id="bomAcyclicBadge" class="badge badge-feasible">VALID ACYCLIC BOM</span>
+              <button id="downloadBomReportBtn" class="btn btn-outline btn-sm" style="display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export BOM Impact CSV
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- Summary KPI Strip -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; background: var(--bg-surface-subtle); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono);">Affected Finished Goods</div>
+                <div id="bomProductsCount" style="font-size: 1.25rem; font-weight: 700; color: var(--navy-primary); margin-top: 0.2rem;">2 Finished Goods</div>
+              </div>
+              <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono);">Affected Subassemblies</div>
+                <div id="bomAssembliesCount" style="font-size: 1.25rem; font-weight: 700; color: var(--primary-blue); margin-top: 0.2rem;">3 Subassemblies</div>
+              </div>
+              <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono);">Combined Daily Consumption</div>
+                <div id="bomCombinedDemand" style="font-size: 1.25rem; font-weight: 700; color: var(--success-green); margin-top: 0.2rem;">40 Units / Day</div>
+              </div>
+              <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mono);">Common Component Status</div>
+                <div style="font-size: 0.95rem; font-weight: 600; color: var(--navy-primary); margin-top: 0.35rem;">Multi-Product Shared</div>
+              </div>
+            </div>
+
+            <!-- BOM Tree Container -->
+            <div id="bomTreeContainer" style="max-height: 480px; overflow-y: auto; padding-right: 0.5rem;">
+              <!-- Populated dynamically by bom-impact.js -->
+            </div>
+          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -1244,6 +1342,70 @@
         </div>
       </div>
     </section>
+
+        <!-- Section: Production Schedule Impact & Line Gantt -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <div class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line><rect x="6" y1="4" width="6" height="4" fill="currentColor"></rect><rect x="10" y1="10" width="8" height="4" fill="currentColor"></rect></svg>
+                Production Schedule Alignment &amp; Line Cutover Gantt
+              </div>
+              <div class="card-subtitle">Active work orders across manufacturing lines correlated with the target cutover date and changeover windows.</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span id="ganttLineCount" class="badge badge-neutral">4 Active Lines</span>
+              <span id="ganttCutoverMarker" class="badge badge-feasible">Cutover Target: Day 15</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div style="overflow-x: auto; background: #FFF; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem;">
+              <svg id="productionGanttSvg" width="100%" height="220" viewBox="0 0 850 220" style="display: block; font-family: var(--font-sans);"></svg>
+            </div>
+            <div style="display: flex; gap: 1.5rem; justify-content: center; margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted);">
+              <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 12px; height: 12px; background: #1D4ED8; border-radius: 2px;"></span> Target Change Line</span>
+              <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 12px; height: 12px; background: #2563EB; border-radius: 2px;"></span> Standard Production</span>
+              <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 12px; height: 2px; background: #DC2626; border-top: 2px dashed #DC2626;"></span> Recommended Cutover Day</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: AI Decision Copilot -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <div class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                AI Decision Copilot (Grounded in Material Balance &amp; BOM)
+              </div>
+              <div class="card-subtitle">Ask questions about cutover timing, supplier risk, demand surges, or inventory tradeoff analysis. Responses cite deterministic proof.</div>
+            </div>
+            <span class="badge badge-blue">Deterministic Grounding Active</span>
+          </div>
+          <div class="card-body">
+            <!-- Quick Prompt Chips -->
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+              <button class="btn btn-outline btn-sm copilot-chip-btn" data-question="Why is this cutover date recommended?" style="font-size: 0.75rem; border-radius: 20px;">Why is this date recommended?</button>
+              <button class="btn btn-outline btn-sm copilot-chip-btn" data-question="What happens if demand increases by 30%?" style="font-size: 0.75rem; border-radius: 20px;">What if demand surges +30%?</button>
+              <button class="btn btn-outline btn-sm copilot-chip-btn" data-question="What is the impact of a 5-day supplier delay?" style="font-size: 0.75rem; border-radius: 20px;">Impact of 5-day supplier delay?</button>
+              <button class="btn btn-outline btn-sm copilot-chip-btn" data-question="Which finished products use this old component?" style="font-size: 0.75rem; border-radius: 20px;">Which products use old component?</button>
+            </div>
+
+            <!-- Chat Output -->
+            <div id="copilotChatContainer" style="height: 320px; overflow-y: auto; background: var(--bg-surface-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem;">
+              <!-- Populated dynamically -->
+            </div>
+
+            <!-- Input Bar -->
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="copilotInput" placeholder="Ask Copilot a question regarding ECN constraints, scrap risk, or cutover feasibility..." style="flex: 1; padding: 0.5rem 0.85rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem; font-family: var(--font-sans);">
+              <button id="copilotSendBtn" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 1rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -1683,6 +1845,31 @@
             <a href="/api/ai/model-card" target="_blank" class="btn btn-outline btn-sm" style="font-size: 0.725rem; padding: 0.2rem 0.5rem;">View JSON Model Card &rarr;</a>
           </div>
         </div>
+
+        <!-- Section: Multi-Plant Inventory & Transfer Optimization -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <div class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-blue)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                Multi-Plant Inventory Synchronization &amp; Transfer Optimization
+              </div>
+              <div class="card-subtitle">Cross-facility inventory balancing across Detroit, Stuttgart, and Austin to mitigate regional stockouts and eliminate scrap.</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <span id="transferToastMsg" style="font-size: 0.8rem; font-weight: 600; color: var(--success-green); display: none;"></span>
+              <button id="executeTransferBtn" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                Execute Inter-Plant Transfer
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="multiPlantGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+              <!-- Populated dynamically by multi-plant.js -->
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1882,7 +2069,7 @@
                 </tr>
                 <tr>
                   <td>Feasibility Status:</td>
-                  <td style="color: var(--success-green);">FEASIBLE</td>
+                  <td id="gt-feasibility" style="color: var(--success-green);">FEASIBLE</td>
                 </tr>
               </tbody>
             </table>
