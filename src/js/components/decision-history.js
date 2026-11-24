@@ -8,8 +8,10 @@ export function initDecisionHistory() {
   const historyDetailModal = document.getElementById('historyDetailModal');
   const closeHistoryDetailBtn = document.getElementById('closeHistoryDetailBtn');
   const exportHistoryCsvBtn = document.getElementById('exportHistoryCsvBtn');
+  const replayDecisionBtn = document.getElementById('replayDecisionBtn');
 
   let records = [...DECISION_HISTORY_RECORDS];
+  let activeDetailRecord = null;
 
   // Asynchronously load decision records from PostgreSQL database
   dbService.getDecisions().then(loadedDecisions => {
@@ -55,6 +57,7 @@ export function initDecisionHistory() {
   function showRecordDetail(recordId) {
     const rec = records.find(r => r.id === recordId);
     if (!rec || !historyDetailModal) return;
+    activeDetailRecord = rec;
 
     document.getElementById('histDetailId').textContent = rec.id;
     document.getElementById('histDetailEcn').textContent = rec.ecn;
@@ -88,6 +91,25 @@ export function initDecisionHistory() {
     });
     historyDetailModal.addEventListener('click', (e) => {
       if (e.target === historyDetailModal) historyDetailModal.classList.remove('visible');
+    });
+  }
+
+  if (replayDecisionBtn) {
+    replayDecisionBtn.addEventListener('click', () => {
+      if (!activeDetailRecord) return;
+      const dayMatch = activeDetailRecord.recommendedDate.match(/^(\d+)/);
+      const day = dayMatch ? parseInt(dayMatch[1], 10) : 15;
+      
+      const dateSlider = document.getElementById('cutoverDateSlider');
+      if (dateSlider) {
+        dateSlider.value = day;
+        dateSlider.dispatchEvent(new Event('input'));
+      }
+      
+      if (historyDetailModal) historyDetailModal.classList.remove('visible');
+      import('../core/router.js').then(({ router }) => {
+        router.navigate('/cutover');
+      });
     });
   }
 

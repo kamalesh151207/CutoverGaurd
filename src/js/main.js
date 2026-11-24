@@ -19,6 +19,11 @@ import { initExplanationVerifier } from './components/explanation-verifier.js';
 import { initPlannerWorkspace } from './components/planner-workspace.js';
 import { initFaq } from './components/faq.js';
 import { initDbStatus } from './components/db-status.js';
+import { initAiIntelligence } from './components/ai-intelligence.js';
+import { initDigitalTwin } from './components/digital-twin.js';
+import { initParetoChart } from './components/pareto-chart.js';
+import { initCounterfactualExplorer } from './components/counterfactual-explorer.js';
+import { initDecisionReport } from './components/decision-report.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[CutoverGuard] Initializing enterprise decision workspaces...');
@@ -42,6 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuditChain();
   initExplanationVerifier(calculationService);
   initPlannerWorkspace(calculationService);
+  initAiIntelligence(calculationService);
+  initDigitalTwin(calculationService);
+  initParetoChart(calculationService);
+  initCounterfactualExplorer(calculationService);
+  initDecisionReport(calculationService);
   initFaq();
 
   // 3. Initialize Router (activates default or deep-linked page view)

@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "test": "node --check src/js/main.js"
+    "test": "node tests/engine-test.js"
   },
   "keywords": [
     "engineering-change-management",

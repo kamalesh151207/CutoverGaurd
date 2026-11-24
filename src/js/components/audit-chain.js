@@ -7,8 +7,9 @@ import { dbService } from '../services/db-service.js';
 
 export function initAuditChain() {
   const auditChainStream = document.getElementById('auditChainStream');
-  const tamperAuditChainBtn = document.getElementById('tamperAuditChainBtn');
-  const restoreAuditChainBtn = document.getElementById('restoreAuditChainBtn');
+  const auditVerifyBtn = document.getElementById('auditVerifyBtn');
+  const auditTamperBtn = document.getElementById('auditTamperBtn') || document.getElementById('tamperAuditChainBtn');
+  const auditRestoreBtn = document.getElementById('auditRestoreBtn') || document.getElementById('restoreAuditChainBtn');
   const auditAlgorithmBadge = document.getElementById('auditAlgorithmBadge');
 
   const auditService = new AuditService();
@@ -68,15 +69,23 @@ export function initAuditChain() {
         auditChainStream.appendChild(connector);
       }
     });
+
+    return verification;
   }
 
-  async function restoreOriginal() {
-    currentChain = await auditService.buildChain(INITIAL_AUDIT_ENTRIES);
-    await renderChain();
+  if (auditVerifyBtn) {
+    auditVerifyBtn.addEventListener('click', async () => {
+      const result = await renderChain();
+      if (result && result.isValid) {
+        alert('Cryptographic Verification PASSED: All blocks in the ledger have valid SHA-256 parent-child hash linkages and uncorrupted payloads.');
+      } else {
+        alert('Cryptographic Verification FAILED: Tamper detected! Block hashes do not match recorded cryptographic signatures.');
+      }
+    });
   }
 
-  if (tamperAuditChainBtn) {
-    tamperAuditChainBtn.addEventListener('click', async () => {
+  if (auditTamperBtn) {
+    auditTamperBtn.addEventListener('click', async () => {
       if (currentChain.length > 1) {
         // Retroactively modify committed cutover date & cost in Block 2
         currentChain[1].data.minCostDate = '05 DEC'; // ILLEGAL CHANGE
@@ -86,8 +95,8 @@ export function initAuditChain() {
     });
   }
 
-  if (restoreAuditChainBtn) {
-    restoreAuditChainBtn.addEventListener('click', restoreOriginal);
+  if (auditRestoreBtn) {
+    auditRestoreBtn.addEventListener('click', restoreOriginal);
   }
 
   restoreOriginal();

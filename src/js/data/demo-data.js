@@ -74,6 +74,30 @@ export const SYNTHETIC_ECNS = [
       leadTime: { label: 'Supplier Lead Time', status: 'MISSING', detail: 'Lead time unverified' },
       productionSchedule: { label: 'Plant Line Schedule', status: 'READY', detail: 'Line 2 Active' }
     }
+  },
+  {
+    id: 'ECN-0440',
+    partOld: 'HARN-PWR-01',
+    partNew: 'HARN-PWR-02',
+    revision: 'Rev D → Rev E',
+    changeType: 'High-Voltage Harness Wire Gauge Upgrade',
+    reason: 'Resistance reduction & enhanced EMI shielding compliance',
+    createdDate: '2026-11-20',
+    plannedDate: '12-DEC-2026',
+    initialStock: 320,
+    dailyDemand: 30,
+    dockDay: 9,
+    status: 'Analysis Ready',
+    statusCode: 'ANALYSIS_READY',
+    readiness: 'READY',
+    inputs: {
+      inventory: { label: 'Inventory Balances', status: 'READY', detail: '320 units on-hand' },
+      bom: { label: 'BOM Structure', status: 'READY', detail: 'Powertrain Inverter Bus' },
+      demand: { label: 'Demand Forecast', status: 'READY', detail: '30 units/day scheduled' },
+      materialReady: { label: 'Replacement Material', status: 'READY', detail: 'Dock ready Day 9' },
+      leadTime: { label: 'Supplier Lead Time', status: 'READY', detail: '14 days confirmed PO' },
+      productionSchedule: { label: 'Plant Line Schedule', status: 'READY', detail: 'Line 4 Active' }
+    }
   }
 ];
 

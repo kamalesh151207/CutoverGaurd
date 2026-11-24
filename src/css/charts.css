@@ -755,3 +755,111 @@
   border-color: var(--risk-border);
   color: var(--risk-red);
 }
+
+/* ==========================================================================
+   EXPLAINABLE AI, DIGITAL TWIN, PARETO & COUNTERFACTUAL STYLES
+   ========================================================================== */
+
+/* Explainable AI Driver Rows */
+.xai-driver-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-surface-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xs);
+  margin-bottom: 0.4rem;
+}
+
+/* Counterfactual Explorer */
+.cf-preset-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.775rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+}
+
+.cf-preset-btn:hover {
+  background: var(--bg-surface-alt);
+  border-color: var(--blue-primary);
+  color: var(--blue-primary);
+}
+
+.cf-preset-btn.active {
+  background: var(--blue-primary);
+  border-color: var(--blue-primary);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.cf-delta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.cf-delta-card {
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xs);
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.cf-delta-label {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  margin-bottom: 0.25rem;
+}
+
+.cf-delta-value {
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+/* Pareto Scatter Points */
+.pareto-point circle {
+  transition: r 0.15s ease, stroke-width 0.15s ease;
+}
+
+.pareto-point:hover circle {
+  r: 8;
+  stroke: var(--blue-primary);
+  stroke-width: 3;
+}
+
+/* Print Styling for Executive Decision Report */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #decisionReportModal, #decisionReportModal * {
+    visibility: visible;
+  }
+  #decisionReportModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    background: #FFFFFF !important;
+    display: block !important;
+  }
+  .app-modal-dialog {
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .app-modal-close, .app-modal-footer button {
+    display: none !important;
+  }
+}
