@@ -91,6 +91,7 @@ export function initDigitalTwin(calculationService) {
   // Listen to slider changes & calculations
   EventBus.on('cutover:evaluated', (model) => renderTwin(model.day));
   EventBus.on('calculations:reconfigured', () => renderTwin(calculationService.cutoverModel.targetOptimalDay));
+  EventBus.on('ecn:changed', () => renderTwin(calculationService.cutoverModel.targetOptimalDay));
 
-  renderTwin(15);
+  renderTwin(calculationService.cutoverModel.targetOptimalDay || 15);
 }

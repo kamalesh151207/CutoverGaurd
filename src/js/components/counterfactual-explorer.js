@@ -2,6 +2,7 @@
  * Counterfactual Decision Explorer Component
  * Evaluates industrial "What If" questions and displays instant differential impacts.
  */
+import { EventBus } from '../core/event-bus.js';
 
 export function initCounterfactualExplorer(calculationService) {
   const cfPresetButtons = document.querySelectorAll('.cf-preset-btn');
@@ -13,65 +14,80 @@ export function initCounterfactualExplorer(calculationService) {
   const cfFeasibilityTag = document.getElementById('cfFeasibilityTag');
   const cfExplanation = document.getElementById('cfExplanation');
 
-  const baselineDay = calculationService.cutoverModel.targetOptimalDay || 15;
-  const baseline = calculationService.evaluateCandidateDay(baselineDay);
+  let activePresetKey = 'earlier';
 
-  const presets = {
-    'earlier': {
-      title: 'Counterfactual: Switch 4 Days Earlier (11-DEC)',
-      day: 11,
-      calc: () => calculationService.evaluateCandidateDay(11),
-      desc: 'Transitioning immediately on dock receipt (11-DEC) eliminates line starvation, but leaves 160 more units of unused old inventory ($1,920 additional scrap write-off).'
-    },
-    'delay': {
-      title: 'Counterfactual: Supplier Delayed by 7 Days (Dock Day 18)',
-      day: 15,
-      calc: () => {
-        // Evaluate Day 15 with delayed dock Day 18
-        const starvedDays = 3; // Day 15 to 18
-        const shortage = starvedDays * calculationService.cutoverModel.baseDemand;
-        return {
-          day: 15,
-          excessOldUnits: 120,
-          shortageUnits: shortage,
-          totalIndex: 118.5,
-          isFeasible: false
-        };
+  function getBaseline() {
+    const baselineDay = calculationService.cutoverModel.targetOptimalDay || 15;
+    return {
+      day: baselineDay,
+      model: calculationService.evaluateCandidateDay(baselineDay)
+    };
+  }
+
+  function getPresets() {
+    const { day: baseDay } = getBaseline();
+    const dockDay = calculationService.cutoverModel.dockDay || 11;
+    const demand = calculationService.cutoverModel.baseDemand || 40;
+
+    return {
+      'earlier': {
+        title: `Counterfactual: Switch Early on Dock Arrival (${dockDay}-DEC)`,
+        day: dockDay,
+        calc: () => calculationService.evaluateCandidateDay(dockDay),
+        desc: `Transitioning immediately on dock receipt (${dockDay}-DEC) eliminates line starvation, but increases leftover scrap write-off.`
       },
-      desc: 'If vendor shipment is delayed to Day 18 while keeping the 15-DEC cutover, assembly suffers 3 days of starvation (120 units unserved), raising cost index by +36.1 pts.'
-    },
-    'surge': {
-      title: 'Counterfactual: Daily Demand Surges by +25% (50 Units/Day)',
-      day: 13,
-      calc: () => {
-        return {
-          day: 13,
-          excessOldUnits: 30,
-          shortageUnits: 0,
-          totalIndex: 86.8,
-          isFeasible: true
-        };
+      'delay': {
+        title: `Counterfactual: Supplier Delayed by 7 Days (Dock Day ${dockDay + 7})`,
+        day: baseDay,
+        calc: () => {
+          const starvedDays = Math.max(0, (dockDay + 7) - baseDay);
+          const shortage = starvedDays * demand;
+          return {
+            day: baseDay,
+            excessOldUnits: calculationService.evaluateCandidateDay(baseDay).excessOldUnits,
+            shortageUnits: shortage,
+            totalIndex: 118.5,
+            isFeasible: shortage === 0
+          };
+        },
+        desc: `If vendor shipment is delayed while keeping Day ${baseDay} cutover, assembly risks parts starvation, raising cost and shortage risk.`
       },
-      desc: 'With demand at 50 units/day, old inventory burns down 2 days faster. Optimal cutover advances to 13-DEC with lower leftover scrap (30 units).'
-    },
-    'buffer': {
-      title: 'Counterfactual: Double Safety Buffer (Hold 6 Days Past Dock)',
-      day: 17,
-      calc: () => calculationService.evaluateCandidateDay(17),
-      desc: 'Holding an extended 6-day buffer past dock receipt pushes cutover to 17-DEC. Old inventory is nearly exhausted (40 units left), but late dual-BOM holding penalties accrue.'
-    }
-  };
+      'surge': {
+        title: `Counterfactual: Daily Demand Surges by +25% (${Math.round(demand * 1.25)} Units/Day)`,
+        day: Math.max(dockDay, baseDay - 2),
+        calc: () => {
+          return {
+            day: Math.max(dockDay, baseDay - 2),
+            excessOldUnits: Math.max(0, 30),
+            shortageUnits: 0,
+            totalIndex: 86.8,
+            isFeasible: true
+          };
+        },
+        desc: `With demand surges, old inventory burns down faster. Optimal cutover advances with lower leftover scrap.`
+      },
+      'buffer': {
+        title: `Counterfactual: Extended Safety Buffer (${Math.min(31, baseDay + 2)}-DEC)`,
+        day: Math.min(31, baseDay + 2),
+        calc: () => calculationService.evaluateCandidateDay(Math.min(31, baseDay + 2)),
+        desc: `Holding an extended buffer past dock receipt allows further inventory drawdown, balancing dual-BOM holding penalties.`
+      }
+    };
+  }
 
   function applyPreset(key) {
+    activePresetKey = key;
+    const presets = getPresets();
     const p = presets[key];
     if (!p) return;
 
     const res = p.calc();
+    const { day: baseDay, model: baseline } = getBaseline();
 
     if (cfQuestionTitle) cfQuestionTitle.textContent = p.title;
 
     // Deltas
-    const deltaDays = res.day - baselineDay;
+    const deltaDays = res.day - baseDay;
     if (cfDeltaDate) {
       cfDeltaDate.textContent = `${res.day}-DEC (${deltaDays >= 0 ? '+' : ''}${deltaDays}d)`;
       cfDeltaDate.style.color = deltaDays === 0 ? 'var(--navy-primary)' : (deltaDays > 0 ? 'var(--blue-primary)' : 'var(--warning-amber)');
@@ -113,6 +129,9 @@ export function initCounterfactualExplorer(calculationService) {
       applyPreset(key);
     });
   });
+
+  EventBus.on('ecn:changed', () => applyPreset(activePresetKey));
+  EventBus.on('calculations:reconfigured', () => applyPreset(activePresetKey));
 
   // Initial preset
   applyPreset('earlier');

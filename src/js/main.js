@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemeSwitcher();
   initEcnWorkspace();
   initDecisionHistory();
-  initKpiCards();
+  initKpiCards(calculationService);
   initCutoverChart(calculationService);
   initScenarioLab(calculationService);
   initMonteCarlo();

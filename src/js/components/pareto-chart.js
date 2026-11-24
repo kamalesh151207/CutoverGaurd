@@ -118,5 +118,6 @@ export function initParetoChart(calculationService) {
   }
 
   EventBus.on('calculations:reconfigured', renderPareto);
+  EventBus.on('ecn:changed', renderPareto);
   renderPareto();
 }
