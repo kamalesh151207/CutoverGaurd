@@ -151,21 +151,6 @@ export function initPlannerWorkspace(calculationService) {
 
     showActionToast('Deterministic netting recalculation completed successfully.');
   }
-    if (cockpitStatusBadge) {
-      cockpitStatusBadge.className = 'badge badge-warning';
-      cockpitStatusBadge.textContent = 'STATUS: RE-CALCULATING CONSTRAINTS...';
-      setTimeout(() => {
-        cockpitStatusBadge.textContent = 'STATUS: PENDING PLANNER APPROVAL';
-      }, 500);
-    }
-    addLog('[RECALCULATION REQUESTED] Input parameters refreshed. Re-executing deterministic netting kernel...', false);
-    const dateSlider = document.getElementById('cutoverDateSlider');
-    const day = dateSlider ? parseInt(dateSlider.value, 10) : 15;
-    const model = calculationService.evaluateCandidateDay(day);
-    EventBus.emit('cutover:evaluated', model);
-
-    showActionToast('Deterministic netting recalculation completed successfully.');
-  }
 
   function showActionToast(msg) {
     let toast = document.getElementById('appActionToast');
