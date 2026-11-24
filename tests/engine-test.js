@@ -369,6 +369,92 @@ try {
 }
 
 // -------------------------------------------------------------
+// TEST SUITE 11: CUTOVER CALCULATION ENGINE & CONSTRAINT AUDIT
+// -------------------------------------------------------------
+console.log('\n--- Test Suite 11: Cutover Calculation Engine & Constraint Audit ---');
+try {
+  // Test 1: Incomplete ECN validation (No arbitrary default date)
+  const incompleteEcn = { id: 'ECN-INCOMP' };
+  const incRes = ecnIntelligenceService.analyzeEcn(incompleteEcn);
+  assert(incRes.isFeasible === false, 'Incomplete ECN is marked infeasible');
+  assert(incRes.missingFields.length >= 3, `Incomplete ECN isolated missing fields (${incRes.missingFields.join(', ')})`);
+  assert(incRes.optimization.recommendedDate === 'INCOMPLETE — DATA REQUIRED', 'Incomplete ECN returns explicit INCOMPLETE indicator instead of arbitrary date');
+
+  // Test 2: Infeasible Cutover Window (Dock Day beyond 30-day horizon)
+  const infeasibleEcn = { id: 'ECN-LATE', partOld: 'COMP-A-104', partNew: 'COMP-B-208', onHand: 400, dailyDemand: 40, dockDay: 35 };
+  const infRes = ecnIntelligenceService.analyzeEcn(infeasibleEcn);
+  assert(infRes.isFeasible === false, 'Delayed dock beyond horizon flags transition as infeasible');
+  assert(infRes.optimization.recommendedDate === 'NO FEASIBLE CUTOVER WINDOW', 'Infeasible ECN explicitly outputs NO FEASIBLE CUTOVER WINDOW');
+
+  // Test 3: Dynamic Old Inventory Change (680 -> 920 units)
+  const customStockEcn = { id: 'ECN-STK-920', partOld: 'COMP-A-104', partNew: 'COMP-B-208', onHand: 920, dailyDemand: 40, dockDay: 11, safetyBuffer: 2 };
+  const stkRes = ecnIntelligenceService.analyzeEcn(customStockEcn);
+  assert(stkRes.optimization.burnDays === 23, '920 units at 40/day burns down in exactly 23 days');
+  assert(stkRes.optimization.recommendedDay === 21, 'Recommended cutover day shifts dynamically to Day 21 (23 - 2 buffer)');
+  assert(stkRes.optimization.recommendedDate === '21-DEC', 'Recommended date maps to 21-DEC');
+
+  // Test 4: Dynamic Demand Change (Surge to 50 u/day with 400 stock)
+  const surgeEcn = { id: 'ECN-SURGE', partOld: 'COMP-A-104', partNew: 'COMP-B-208', onHand: 400, dailyDemand: 50, dockDay: 11 };
+  const surgeRes = ecnIntelligenceService.analyzeEcn(surgeEcn);
+  assert(surgeRes.optimization.burnDays === 8, '400 units at 50/day burns out on Day 8');
+  assert(surgeRes.optimization.burnDays < surgeRes.inventory.dockDay, 'Surged burnout precedes dock Day 11, creating pre-dock deficit');
+
+  // Test 5: Delayed Supplier Delivery (Dock Day 11 -> Day 16)
+  const delayEcn = { id: 'ECN-DELAY', partOld: 'COMP-A-104', partNew: 'COMP-B-208', onHand: 680, dailyDemand: 40, dockDay: 16 };
+  const delayRes = ecnIntelligenceService.analyzeEcn(delayEcn);
+  assert(delayRes.optimization.earliestFeasibleDay === 16, 'Earliest feasible day shifts to Day 16');
+  assert(delayRes.optimization.feasibleWindow === '16–19 DEC', 'Feasible window contracts to 16–19 DEC');
+} catch (err) {
+  console.error('Constraint Audit Test Error:', err);
+  failed++;
+}
+
+// -------------------------------------------------------------
+// TEST SUITE 12: REST API PERSISTENCE & DATA FLOW VERIFICATION
+// -------------------------------------------------------------
+console.log('\n--- Test Suite 12: REST API Persistence & Data Flow Verification ---');
+try {
+  // 1. Create custom ECN
+  const postEcnRes = await invokeApi('/api/ecns', 'POST', {
+    id: 'ECN-TEST-999',
+    partOld: 'TEST-PART-OLD',
+    partNew: 'TEST-PART-NEW',
+    initialStock: 500,
+    dailyDemand: 25,
+    dockDay: 8
+  });
+  assert(postEcnRes.status === 201, 'POST /api/ecns creates new record with HTTP 201');
+  assert(postEcnRes.data.data.id === 'ECN-TEST-999', 'Created record retains exact entered ID');
+  assert(postEcnRes.data.data.initialStock === 500, 'Created record persists entered stock (500 units)');
+
+  // 2. Query GET /api/ecns to confirm persistence
+  const getEcnsRes = await invokeApi('/api/ecns', 'GET');
+  assert(getEcnsRes.data.data.some(e => e.id === 'ECN-TEST-999'), 'GET /api/ecns confirms persistence of ECN-TEST-999');
+
+  // 3. Update ECN via PUT
+  const putEcnRes = await invokeApi('/api/ecns', 'PUT', {
+    id: 'ECN-TEST-999',
+    initialStock: 450
+  });
+  assert(putEcnRes.status === 200, 'PUT /api/ecns updates record with HTTP 200');
+  assert(putEcnRes.data.data.initialStock === 450, 'Updated stock persists (450 units)');
+
+  // 4. Save and retrieve scenario
+  const postScenRes = await invokeApi('/api/scenarios', 'POST', {
+    ecnId: 'ECN-TEST-999',
+    cutoverDay: 18,
+    costIndex: 85.5
+  });
+  assert(postScenRes.status === 201, 'POST /api/scenarios persists scenario run with HTTP 201');
+
+  const getScenRes = await invokeApi('/api/scenarios', 'GET');
+  assert(getScenRes.data.data.some(s => s.ecnId === 'ECN-TEST-999'), 'GET /api/scenarios confirms scenario persistence');
+} catch (err) {
+  console.error('API Persistence Test Error:', err);
+  failed++;
+}
+
+// -------------------------------------------------------------
 // TEST SUMMARY REPORT
 // -------------------------------------------------------------
 console.log('\n=============================================================');

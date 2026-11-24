@@ -184,87 +184,207 @@ export function initEcnWorkspace() {
     });
   }
 
-  // Auto-fill component inventory & dock day when typing/selecting components in modal
+  // Auto-fill & live preview in modal
   const inpPartOld = document.getElementById('inpPartOld');
   const inpPartNew = document.getElementById('inpPartNew');
+  const inpRevOld = document.getElementById('inpRevOld');
+  const inpRevNew = document.getElementById('inpRevNew');
   const inpStock = document.getElementById('inpStock');
+  const inpReservedOld = document.getElementById('inpReservedOld');
+  const inpAllocatedOld = document.getElementById('inpAllocatedOld');
+  const inpUnitCost = document.getElementById('inpUnitCost');
   const inpDemand = document.getElementById('inpDemand');
   const inpDockDay = document.getElementById('inpDockDay');
+  const inpPoQty = document.getElementById('inpPoQty');
+  const inpLeadTime = document.getElementById('inpLeadTime');
+  const inpUnitCostNew = document.getElementById('inpUnitCostNew');
+  const calcAvailablePreview = document.getElementById('calcAvailablePreview');
+  const newEcnErrorBanner = document.getElementById('newEcnErrorBanner');
+
+  function updateAvailablePreview() {
+    const onHand = parseInt(inpStock ? inpStock.value : 0, 10) || 0;
+    const reserved = parseInt(inpReservedOld ? inpReservedOld.value : 0, 10) || 0;
+    const allocated = parseInt(inpAllocatedOld ? inpAllocatedOld.value : 0, 10) || 0;
+    const avail = Math.max(0, onHand - reserved - allocated);
+    if (calcAvailablePreview) {
+      calcAvailablePreview.textContent = `${avail} Units (${onHand} on-hand − ${reserved} reserved − ${allocated} allocated)`;
+    }
+  }
+
+  [inpStock, inpReservedOld, inpAllocatedOld].forEach(el => {
+    if (el) el.addEventListener('input', updateAvailablePreview);
+  });
 
   if (inpPartOld) {
     inpPartOld.addEventListener('change', () => {
-      const comp = bomModel.getComponent(inpPartOld.value.trim());
-      const impact = bomModel.analyzeComponentImpact(inpPartOld.value.trim());
-      if (inpStock && comp.onHand) inpStock.value = comp.onHand;
-      if (inpDemand && impact.totalDailyDemand) inpDemand.value = impact.totalDailyDemand;
+      const partId = inpPartOld.value.trim();
+      if (!partId) return;
+      const comp = bomModel.getComponent(partId);
+      const impact = bomModel.analyzeComponentImpact(partId);
+      if (comp) {
+        if (inpRevOld && comp.revision) inpRevOld.value = comp.revision;
+        if (inpStock && comp.onHand !== undefined) inpStock.value = comp.onHand;
+        if (inpReservedOld && comp.reserved !== undefined) inpReservedOld.value = comp.reserved;
+        if (inpAllocatedOld && comp.allocated !== undefined) inpAllocatedOld.value = comp.allocated || 0;
+        if (inpUnitCost && comp.unitCost) inpUnitCost.value = comp.unitCost.toFixed(2);
+      }
+      if (inpDemand && impact.totalDailyDemand) {
+        inpDemand.value = impact.totalDailyDemand;
+      }
+      updateAvailablePreview();
     });
   }
+
   if (inpPartNew) {
     inpPartNew.addEventListener('change', () => {
-      const compNew = bomModel.getComponent(inpPartNew.value.trim());
-      if (inpDockDay && compNew.dockDay) inpDockDay.value = compNew.dockDay;
+      const partId = inpPartNew.value.trim();
+      if (!partId) return;
+      const compNew = bomModel.getComponent(partId);
+      if (compNew) {
+        if (inpRevNew && compNew.revision) inpRevNew.value = compNew.revision;
+        if (inpDockDay && compNew.dockDay) inpDockDay.value = compNew.dockDay;
+        if (inpLeadTime && compNew.leadTime) inpLeadTime.value = compNew.leadTime;
+        if (inpPoQty && compNew.poQty) inpPoQty.value = compNew.poQty;
+        if (inpUnitCostNew && compNew.unitCost) inpUnitCostNew.value = compNew.unitCost.toFixed(2);
+      }
     });
   }
 
   // Submit automated ECN form
   if (newEcnForm) {
-    newEcnForm.addEventListener('submit', (e) => {
+    newEcnForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const formId = document.getElementById('inpEcnId').value.trim() || `ECN-0${Math.floor(Math.random() * 800 + 200)}`;
-      const partOld = document.getElementById('inpPartOld').value.trim() || 'COMP-A-104';
-      const partNew = document.getElementById('inpPartNew').value.trim() || 'COMP-B-208';
-      const reason = document.getElementById('inpReason').value.trim() || 'Engineering specification update';
-      const stock = parseInt(document.getElementById('inpStock').value, 10) || 680;
-      const demand = parseInt(document.getElementById('inpDemand').value, 10) || 40;
-      const dockDay = parseInt(document.getElementById('inpDockDay').value, 10) || 11;
+      if (newEcnErrorBanner) newEcnErrorBanner.style.display = 'none';
 
-      // Automated ECN Analysis Pipeline
+      const formId = (document.getElementById('inpEcnId')?.value || '').trim();
+      const partOld = (document.getElementById('inpPartOld')?.value || '').trim();
+      const partNew = (document.getElementById('inpPartNew')?.value || '').trim();
+      const changeType = document.getElementById('inpChangeType')?.value || 'Form-Fit-Function Revision';
+      const plant = document.getElementById('inpPlant')?.value || 'Plant 3 (Austin / TX)';
+      const reason = (document.getElementById('inpReason')?.value || '').trim();
+      const revOld = (document.getElementById('inpRevOld')?.value || 'Rev A').trim();
+      const revNew = (document.getElementById('inpRevNew')?.value || 'Rev B').trim();
+
+      const onHand = parseInt(document.getElementById('inpStock')?.value, 10);
+      const reserved = parseInt(document.getElementById('inpReservedOld')?.value, 10) || 0;
+      const allocated = parseInt(document.getElementById('inpAllocatedOld')?.value, 10) || 0;
+      const unitCost = parseFloat(document.getElementById('inpUnitCost')?.value) || 12.0;
+
+      const dockDay = parseInt(document.getElementById('inpDockDay')?.value, 10);
+      const poQty = parseInt(document.getElementById('inpPoQty')?.value, 10) || 800;
+      const leadTime = parseInt(document.getElementById('inpLeadTime')?.value, 10) || 25;
+      const poStatus = document.getElementById('inpPoStatus')?.value || 'confirmed';
+      const dualSource = document.getElementById('inpDualSource')?.value === 'true';
+      const unitCostNew = parseFloat(document.getElementById('inpUnitCostNew')?.value) || 14.5;
+
+      const demand = parseInt(document.getElementById('inpDemand')?.value, 10);
+      const safetyBuffer = parseInt(document.getElementById('inpSafetyBuffer')?.value, 10) || 2;
+      const shortagePenalty = parseFloat(document.getElementById('inpShortagePenalty')?.value) || 45.0;
+      const constraint = document.getElementById('inpConstraint')?.value || 'BALANCED';
+
+      // Validation check
+      const missing = [];
+      if (!formId) missing.push('ECN Identifier');
+      if (!partOld) missing.push('Current Component ID');
+      if (!partNew) missing.push('Replacement Component ID');
+      if (isNaN(onHand) || onHand < 0) missing.push('Valid On-Hand Stock (>= 0)');
+      if (isNaN(demand) || demand <= 0) missing.push('Valid Daily Demand (> 0)');
+      if (isNaN(dockDay) || dockDay <= 0) missing.push('Valid Dock Ready Day (> 0)');
+
+      if (missing.length > 0) {
+        if (newEcnErrorBanner) {
+          newEcnErrorBanner.innerHTML = `<strong>Cannot Launch Analysis:</strong> The following required inputs are missing or invalid: <ul>${missing.map(m => `<li>${m}</li>`).join('')}</ul>`;
+          newEcnErrorBanner.style.display = 'block';
+        }
+        return;
+      }
+
+      // Automated ECN Analysis Pipeline using actual user inputs
       const analysis = ecnIntelligenceService.analyzeEcn({
         id: formId,
         partOld,
         partNew,
-        initialStock: stock,
-        dailyDemand: demand,
+        revision: `${revOld} → ${revNew}`,
+        changeType,
+        plant,
+        reason: reason || 'Engineering change notice',
+        onHand,
+        initialStock: onHand,
+        reserved,
+        allocated,
+        unitCost,
         dockDay,
-        reason
+        poQty,
+        leadTime,
+        poStatus,
+        dualSource,
+        unitCostNew,
+        dailyDemand: demand,
+        safetyBuffer,
+        shortagePenalty,
+        constraint
       });
 
       const newRecord = {
         id: formId,
         partOld,
         partNew,
-        revision: 'Rev A → Rev B',
-        changeType: 'Form-Fit-Function Revision',
-        reason,
+        revision: `${revOld} → ${revNew}`,
+        changeType,
+        plant,
+        reason: reason || 'Engineering change notice',
         createdDate: new Date().toISOString().slice(0, 10),
         plannedDate: analysis.optimization.recommendedDate,
-        initialStock: stock,
+        initialStock: onHand,
+        onHand,
+        reserved,
+        allocated,
         dailyDemand: demand,
         dockDay,
-        status: 'Analysis Ready (Automated Pipeline)',
-        statusCode: 'ANALYSIS_READY',
-        readiness: 'READY',
+        status: analysis.status || (analysis.optimization.isFeasible ? 'Analysis Ready' : 'Infeasible Window'),
+        statusCode: analysis.statusCode || (analysis.optimization.isFeasible ? 'ANALYSIS_READY' : 'DATA_PENDING'),
+        readiness: analysis.readiness || (analysis.optimization.isFeasible ? 'READY' : 'NEEDS_VALIDATION'),
         analysis,
         inputs: {
-          inventory: { label: 'Inventory Balances', status: 'READY', detail: `${stock} units on-hand (${analysis.inventory.available}u available)` },
-          bom: { label: 'BOM Structure', status: 'READY', detail: `${analysis.bomImpact.productCount} Finished Products Affected` },
-          demand: { label: 'Demand Forecast', status: 'READY', detail: `${demand} units/day combined` },
-          materialReady: { label: 'Replacement Material', status: 'READY', detail: `Dock ready Day ${dockDay}` },
-          leadTime: { label: 'Supplier Lead Time', status: 'READY', detail: `${analysis.inventory.leadTime} days confirmed PO` },
-          productionSchedule: { label: 'Plant Line Schedule', status: 'READY', detail: `${analysis.bomImpact.affectedLines.join(', ') || 'Line 3'} Active` }
+          inventory: { label: 'Inventory Balances', status: 'READY', detail: `${onHand} on-hand (${analysis.inventory.available}u freely available, ${reserved}u reserved)` },
+          bom: { label: 'BOM Structure', status: 'READY', detail: `${analysis.bomImpact.productCount} Finished Product(s) Affected` },
+          demand: { label: 'Demand Forecast', status: 'READY', detail: `${demand} units/day aggregate` },
+          materialReady: { label: 'Replacement Material', status: 'READY', detail: `Dock ready Day ${dockDay} (${analysis.optimization.earliestDate || 'Pending'})` },
+          leadTime: { label: 'Supplier Lead Time', status: 'READY', detail: `${leadTime} days (${poStatus})` },
+          productionSchedule: { label: 'Plant Line Schedule', status: 'READY', detail: `${analysis.bomImpact.affectedLines.join(', ') || plant} Active` }
         }
       };
 
-      ecns.unshift(newRecord);
-      EventBus.emit('ecn:created', newRecord);
-      // Persist to PostgreSQL database asynchronously
-      dbService.createEcn(newRecord).catch(err => console.warn('Could not persist to DB:', err));
+      // Persist to local array and database
+      const existingIdx = ecns.findIndex(e => e.id === newRecord.id);
+      if (existingIdx >= 0) {
+        ecns[existingIdx] = newRecord;
+      } else {
+        ecns.unshift(newRecord);
+      }
+
+      try {
+        await dbService.createEcn(newRecord);
+      } catch (err) {
+        console.warn('DB persistence warning:', err);
+      }
+
       closeModal();
       setActiveEcn(newRecord.id);
       newEcnForm.reset();
+      renderEcnTable();
       router.navigate('/cutover');
     });
   }
+
+  // Listen to external ECN updates (e.g. from tuning controls on Cutover Analysis)
+  EventBus.on('ecn:updated', (updatedEcn) => {
+    const idx = ecns.findIndex(e => e.id === updatedEcn.id);
+    if (idx >= 0) {
+      ecns[idx] = { ...ecns[idx], ...updatedEcn };
+      renderEcnTable();
+    }
+  });
 
   // Initial render
   const defaultEcn = ecns[0];

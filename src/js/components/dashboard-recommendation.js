@@ -6,7 +6,7 @@
 
 import { EventBus } from '../core/event-bus.js';
 import { router } from '../core/router.js';
-import { SYNTHETIC_ECNS } from '../data/demo-data.js';
+import { dbService } from '../services/db-service.js';
 import { ecnIntelligenceService } from '../services/ecn-intelligence-service.js';
 
 export function initDashboardRecommendation(calculationService) {
@@ -26,32 +26,74 @@ export function initDashboardRecommendation(calculationService) {
   const ovEcnSummaryTableBody = document.getElementById('ovEcnSummaryTableBody');
   const ovEcnSearchInput = document.getElementById('ovEcnSearchInput');
 
-  function renderExecutiveRecommendation() {
-    const ecn = calculationService.activeEcn || SYNTHETIC_ECNS[0] || {};
+  let loadedEcns = [];
+
+  async function refreshEcnList() {
+    try {
+      loadedEcns = await dbService.getEcns();
+    } catch (e) {
+      loadedEcns = [];
+    }
+  }
+
+  async function renderExecutiveRecommendation() {
+    await refreshEcnList();
+    const activeId = calculationService.activeEcn?.id;
+    let ecn = loadedEcns.find(e => e.id === activeId) || calculationService.activeEcn || loadedEcns[0] || {};
+    
     const analysis = ecnIntelligenceService.analyzeEcn(ecn);
     const opt = analysis.optimization;
     const inv = analysis.inventory;
 
-    if (ovRecDateDisplay) ovRecDateDisplay.textContent = opt.recommendedDate;
-    if (ovFeasibleWindowDisplay) ovFeasibleWindowDisplay.textContent = `${opt.feasibleWindow} 2026`;
-    if (ovLrmDisplay) ovLrmDisplay.textContent = opt.lrmDate;
-    if (ovCostIndexDisplay) ovCostIndexDisplay.textContent = `${opt.costIndex} pts`;
-    if (ovOldStockDisplay) ovOldStockDisplay.textContent = `${opt.excessOldUnits} units ($${opt.scrapCostUsd.toLocaleString()})`;
-    if (ovReplacementStockDisplay) ovReplacementStockDisplay.textContent = `${inv.replacementPoQty} units (Day ${inv.dockDay} Arrival)`;
+    if (ovRecDateDisplay) {
+      ovRecDateDisplay.textContent = opt.recommendedDate || 'NO FEASIBLE DATE';
+      if (!opt.isFeasible) {
+        ovRecDateDisplay.style.color = 'var(--risk-red)';
+      } else {
+        ovRecDateDisplay.style.color = 'var(--blue-primary)';
+      }
+    }
+
+    if (ovFeasibleWindowDisplay) {
+      ovFeasibleWindowDisplay.textContent = opt.feasibleWindow || 'NO FEASIBLE WINDOW';
+    }
+
+    if (ovLrmDisplay) {
+      ovLrmDisplay.textContent = opt.lrmDate || 'N/A';
+    }
+
+    if (ovCostIndexDisplay) {
+      ovCostIndexDisplay.textContent = opt.costIndex !== null ? `${opt.costIndex} pts` : 'N/A';
+    }
+
+    if (ovOldStockDisplay) {
+      ovOldStockDisplay.textContent = `${opt.excessOldUnits} units ($${opt.scrapCostUsd.toLocaleString()})`;
+    }
+
+    if (ovReplacementStockDisplay) {
+      ovReplacementStockDisplay.textContent = inv.dockDay 
+        ? `${inv.replacementPoQty || 800} units (Day ${inv.dockDay} Arrival)` 
+        : 'Availability Unconfirmed';
+    }
+
     if (ovShortageDisplay) {
       ovShortageDisplay.textContent = `${opt.shortageUnits} units`;
       ovShortageDisplay.style.color = opt.shortageUnits === 0 ? 'var(--success-green)' : 'var(--risk-red)';
     }
+
     if (ovFeasibilityBadge) {
-      ovFeasibilityBadge.textContent = opt.feasibilityStatus;
+      ovFeasibilityBadge.textContent = opt.feasibilityStatus || (opt.isFeasible ? 'FEASIBLE' : 'INFEASIBLE');
       ovFeasibilityBadge.className = `badge ${opt.isFeasible ? 'badge-feasible' : 'badge-risk'}`;
     }
+
     if (ovActiveEcnBadge) {
       ovActiveEcnBadge.textContent = `${ecn.id || 'ECN-0248'} (${analysis.partOld} → ${analysis.partNew})`;
     }
+
     if (ovConfidenceDisplay) {
-      ovConfidenceDisplay.textContent = '95.4% Certified High Confidence';
+      ovConfidenceDisplay.textContent = opt.isFeasible ? '95.4% Certified High Confidence' : 'Recommendation Incomplete / Infeasible';
     }
+
     if (ovTimestampDisplay) {
       ovTimestampDisplay.textContent = `Calculated: ${new Date().toLocaleTimeString()} UTC`;
     }
@@ -62,6 +104,16 @@ export function initDashboardRecommendation(calculationService) {
 
   function renderTransitionTimeline(opt, inv) {
     if (!ovTimelineSvg) return;
+
+    if (!opt.isFeasible || !inv.dockDay || !opt.recommendedDay) {
+      ovTimelineSvg.innerHTML = `
+        <rect x="0" y="0" width="860" height="90" fill="var(--bg-surface-subtle)" rx="6" />
+        <text x="430" y="48" font-size="13" font-family="var(--font-mono)" font-weight="bold" fill="var(--risk-red)" text-anchor="middle">
+          ⚠ NO FEASIBLE TRANSITION WINDOW — SHORTAGE DEFICIT DETECTED
+        </text>
+      `;
+      return;
+    }
 
     const width = 860;
     const height = 90;
@@ -81,7 +133,7 @@ export function initDashboardRecommendation(calculationService) {
       <line x1="${padL}" y1="40" x2="${width - padR}" y2="40" stroke="var(--border-color)" stroke-width="4" stroke-linecap="round" />
       
       <!-- Feasible Window Band -->
-      <rect x="${dockX}" y="36" width="${lrmX - dockX}" height="8" fill="var(--success-green)" opacity="0.3" rx="4" />
+      <rect x="${dockX}" y="36" width="${Math.max(10, lrmX - dockX)}" height="8" fill="var(--success-green)" opacity="0.3" rx="4" />
 
       <!-- Dock Milestone -->
       <circle cx="${dockX}" cy="40" r="6" fill="#16A34A" stroke="#FFFFFF" stroke-width="2" />
@@ -108,13 +160,20 @@ export function initDashboardRecommendation(calculationService) {
     const query = (ovEcnSearchInput ? ovEcnSearchInput.value : '').toLowerCase().trim();
     const activeId = calculationService.activeEcn?.id || 'ECN-0248';
 
-    const ecnList = SYNTHETIC_ECNS.filter(e => 
-      e.id.toLowerCase().includes(query) ||
-      e.partOld.toLowerCase().includes(query) ||
-      e.partNew.toLowerCase().includes(query)
+    const list = loadedEcns.filter(e => 
+      (e.id || '').toLowerCase().includes(query) ||
+      (e.partOld || '').toLowerCase().includes(query) ||
+      (e.partNew || '').toLowerCase().includes(query)
     );
 
-    ovEcnSummaryTableBody.innerHTML = ecnList.map(ecn => {
+    if (list.length === 0) {
+      ovEcnSummaryTableBody.innerHTML = `
+        <tr><td colspan="8" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">No active Engineering Change Orders found matching query.</td></tr>
+      `;
+      return;
+    }
+
+    ovEcnSummaryTableBody.innerHTML = list.map(ecn => {
       const analysis = ecnIntelligenceService.analyzeEcn(ecn);
       const opt = analysis.optimization;
       const isActive = ecn.id === activeId;
@@ -127,7 +186,7 @@ export function initDashboardRecommendation(calculationService) {
           <td style="font-family: var(--font-mono); font-size: 0.8rem;">
             ${ecn.partOld} &rarr; <strong style="color: var(--blue-primary);">${ecn.partNew}</strong>
           </td>
-          <td style="font-family: var(--font-mono); font-weight: 700; color: var(--blue-primary); font-size: 0.85rem;">
+          <td style="font-family: var(--font-mono); font-weight: 700; color: ${opt.isFeasible ? 'var(--blue-primary)' : 'var(--risk-red)'}; font-size: 0.85rem;">
             ${opt.recommendedDate}
           </td>
           <td style="font-family: var(--font-mono); font-size: 0.8rem;">
@@ -154,7 +213,7 @@ export function initDashboardRecommendation(calculationService) {
     ovEcnSummaryTableBody.querySelectorAll('.select-dashboard-ecn-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-ecn-id');
-        const target = SYNTHETIC_ECNS.find(e => e.id === id);
+        const target = loadedEcns.find(e => e.id === id);
         if (target) {
           calculationService.reconfigureWithEcn(target);
           EventBus.emit('ecn:changed', target);
@@ -170,6 +229,7 @@ export function initDashboardRecommendation(calculationService) {
 
   EventBus.on('ecn:changed', renderExecutiveRecommendation);
   EventBus.on('ecn:created', renderExecutiveRecommendation);
+  EventBus.on('ecn:updated', renderExecutiveRecommendation);
   EventBus.on('calculations:reconfigured', renderExecutiveRecommendation);
 
   renderExecutiveRecommendation();

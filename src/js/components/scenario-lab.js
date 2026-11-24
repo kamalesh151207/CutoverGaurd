@@ -1,6 +1,7 @@
 /**
  * What-If Scenario Lab Component
  */
+import { EventBus } from '../core/event-bus.js';
 
 export function initScenarioLab(calculationService) {
   const scenarioDemandSlider = document.getElementById('scenarioDemandSlider');
@@ -98,15 +99,25 @@ export function initScenarioLab(calculationService) {
     if (slider) slider.addEventListener('input', updateScenarios);
   });
 
-  if (resetScenariosBtn) {
-    resetScenariosBtn.addEventListener('click', () => {
-      if (scenarioDemandSlider) scenarioDemandSlider.value = 0;
-      if (scenarioDelaySlider) scenarioDelaySlider.value = 0;
-      if (scenarioStockSlider) scenarioStockSlider.value = 600;
-      if (scenarioBufferSlider) scenarioBufferSlider.value = 3;
-      updateScenarios();
-    });
+  function resetToActiveEcnBaseline() {
+    const ecn = calculationService.activeEcn || {};
+    const baseStock = ecn.initialStock !== undefined ? Number(ecn.initialStock) : 680;
+    if (scenarioDemandSlider) scenarioDemandSlider.value = 0;
+    if (scenarioDelaySlider) scenarioDelaySlider.value = 0;
+    if (scenarioStockSlider) {
+      scenarioStockSlider.max = Math.max(1200, baseStock * 1.5);
+      scenarioStockSlider.value = baseStock;
+    }
+    if (scenarioBufferSlider) scenarioBufferSlider.value = 2;
+    updateScenarios();
   }
 
-  updateScenarios();
+  if (resetScenariosBtn) {
+    resetScenariosBtn.addEventListener('click', resetToActiveEcnBaseline);
+  }
+
+  EventBus.on('ecn:changed', resetToActiveEcnBaseline);
+  EventBus.on('calculations:reconfigured', resetToActiveEcnBaseline);
+
+  resetToActiveEcnBaseline();
 }

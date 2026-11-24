@@ -800,30 +800,45 @@
 
         <!-- Inputs Configuration Bar -->
         <div class="card" style="margin-bottom: 1.5rem; background: var(--bg-surface-subtle);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-            <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--navy-primary);">ANALYSIS INPUT ASSUMPTIONS (ECN-0248)</span>
-            <span class="badge badge-feasible">VERIFIED CONSTRAINTS</span>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <span style="font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--navy-primary);" id="cutoverAssumpEcn">ANALYSIS INPUT ASSUMPTIONS (ECN-0248)</span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span id="cutoverAssumpStatusBadge" class="badge badge-feasible">VERIFIED CONSTRAINTS</span>
+              <button class="btn btn-outline btn-sm" id="resetCutoverBtn" style="font-size: 0.725rem; padding: 0.2rem 0.5rem;">Reset to Baseline</button>
+              <button class="btn btn-secondary btn-sm" id="saveScenarioBtn" style="font-size: 0.725rem; padding: 0.2rem 0.5rem;">Save Scenario</button>
+              <button class="btn btn-primary btn-sm" id="recomputeCutoverBtn" style="font-size: 0.725rem; padding: 0.2rem 0.55rem;">Recalculate</button>
+              <button class="btn btn-outline btn-sm" id="exportCutoverBriefBtn" style="font-size: 0.725rem; padding: 0.2rem 0.5rem;">Export CSV</button>
+            </div>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.85rem; align-items: center;">
             <div>
-              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">CURRENT WAREHOUSE STOCK</span>
-              <strong style="font-family: var(--font-mono); font-size: 0.95rem;">680 Units</strong>
+              <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">WAREHOUSE ON-HAND STOCK</span>
+              <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem;">
+                <input type="number" id="tuneStockInput" value="680" min="0" style="width: 85px; padding: 0.25rem 0.45rem; border: 1px solid var(--border-color); border-radius: var(--radius-xs); font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;">
+                <span id="cutoverAssumpStock" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">Units</span>
+              </div>
             </div>
             <div>
               <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">DAILY CONSUMPTION RATE</span>
-              <strong style="font-family: var(--font-mono); font-size: 0.95rem;">40 Units / Day</strong>
+              <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem;">
+                <input type="number" id="tuneDemandInput" value="40" min="1" style="width: 75px; padding: 0.25rem 0.45rem; border: 1px solid var(--border-color); border-radius: var(--radius-xs); font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;">
+                <span id="cutoverAssumpDemand" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">u/day</span>
+              </div>
             </div>
             <div>
               <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">REPLACEMENT DOCK READY</span>
-              <strong style="font-family: var(--font-mono); font-size: 0.95rem; color: var(--blue-primary);">Day 11 (11-DEC)</strong>
+              <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.2rem;">
+                <input type="number" id="tuneDockInput" value="11" min="1" max="31" style="width: 65px; padding: 0.25rem 0.45rem; border: 1px solid var(--border-color); border-radius: var(--radius-xs); font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: var(--blue-primary);">
+                <span id="cutoverAssumpDock" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--blue-primary); font-weight: 600;">Day 11 (11-DEC)</span>
+              </div>
             </div>
             <div>
               <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">HOLDING COST PENALTY</span>
-              <strong style="font-family: var(--font-mono); font-size: 0.95rem;">.20 / unit / day</strong>
+              <strong id="cutoverAssumpHolding" style="font-family: var(--font-mono); font-size: 0.9rem;">$0.20 / u / day</strong>
             </div>
             <div>
               <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono); display: block;">STOCKOUT STARVATION PENALTY</span>
-              <strong style="font-family: var(--font-mono); font-size: 0.95rem; color: var(--risk-red);">.00 / unit</strong>
+              <strong id="cutoverAssumpShortage" style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--risk-red);">$45.00 / unit</strong>
             </div>
           </div>
         </div>
@@ -2109,55 +2124,170 @@
        MODAL: NEW ENGINEERING CHANGE NOTICE
        ======================================================================== -->
   <div class="app-modal-backdrop" id="newEcnModal" aria-hidden="true">
-    <div class="app-modal-dialog" role="dialog" aria-labelledby="modalNewEcnTitle">
-      <div class="app-modal-header">
-        <h3 class="app-modal-title" id="modalNewEcnTitle">Create New Engineering Change Notice (ECN)</h3>
+    <div class="app-modal-dialog" role="dialog" aria-labelledby="modalNewEcnTitle" style="max-width: 860px; width: 92%;">
+      <div class="app-modal-header" style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);">
+        <div>
+          <h3 class="app-modal-title" id="modalNewEcnTitle" style="font-size: 1.15rem; font-weight: 700; color: var(--navy-primary); margin: 0;">Create &amp; Ingest Engineering Change Notice (ECN)</h3>
+          <p style="font-size: 0.775rem; color: var(--text-muted); margin: 0.25rem 0 0;">Enter engineering change parameters, inventory netting constraints, and supplier dock readiness.</p>
+        </div>
         <button class="app-modal-close" id="closeNewEcnModalBtn" aria-label="Close modal">&times;</button>
       </div>
       <form id="newEcnForm">
-        <div class="app-modal-body">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">ECN NUMBER</label>
-              <input type="text" id="inpEcnId" placeholder="e.g. ECN-0410" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+        <div class="app-modal-body" style="max-height: 72vh; overflow-y: auto; padding: 1.25rem 1.5rem;">
+          <div id="newEcnErrorBanner" style="display: none; background: #FEF2F2; border: 1px solid #F87171; color: #991B1B; padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-size: 0.8rem; margin-bottom: 1rem;"></div>
+
+          <!-- Section 1: ECN Header & Metadata -->
+          <div style="margin-bottom: 1.25rem; background: var(--bg-surface-subtle); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 700; color: var(--primary-blue); text-transform: uppercase; margin-bottom: 0.75rem;">
+              <span>1. Engineering Change Order Metadata</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">PLANNED DOCK READY DAY</label>
-              <input type="number" id="inpDockDay" min="1" max="25" value="12" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 0.85rem;">
+              <div>
+                <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">ECN IDENTIFIER *</label>
+                <input type="text" id="inpEcnId" placeholder="e.g. ECN-0410" required style="width: 100%; padding: 0.45rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">CHANGE CLASSIFICATION</label>
+                <select id="inpChangeType" style="width: 100%; padding: 0.45rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.825rem; background: #FFF;">
+                  <option value="Form-Fit-Function Revision">Form-Fit-Function Revision (Class 1)</option>
+                  <option value="Component End-of-Life (EOL)">Component End-of-Life (EOL) Phase-out</option>
+                  <option value="Cost Optimization Revision">Cost Optimization &amp; Value Engineering</option>
+                  <option value="Supplier Quality Defect Fix">Supplier Quality Defect Containment</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">TARGET PLANT</label>
+                <select id="inpPlant" style="width: 100%; padding: 0.45rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.825rem; background: #FFF;">
+                  <option value="Plant 3 (Austin / TX)">Plant 3 (Austin / TX)</option>
+                  <option value="Plant 1 (Detroit / MI)">Plant 1 (Detroit / MI)</option>
+                  <option value="Plant 2 (Stuttgart / DE)">Plant 2 (Stuttgart / DE)</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top: 0.75rem;">
+              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">ENGINEERING JUSTIFICATION &amp; CHANGE DETAILS</label>
+              <textarea id="inpReason" rows="2" placeholder="Document engineering rationale (e.g. thermal dissipation enhancement, silicon carbide transition, vendor obsolescence)..." style="width: 100%; padding: 0.45rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.825rem; font-family: var(--font-sans);"></textarea>
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">CURRENT COMPONENT ID</label>
-              <input type="text" id="inpPartOld" placeholder="e.g. COMP-A-104" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+          <!-- Section 2: Phase-Out (Old) Component Inventory Netting -->
+          <div style="margin-bottom: 1.25rem; background: var(--bg-surface-subtle); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 700; color: var(--warning-amber); text-transform: uppercase; margin-bottom: 0.75rem;">
+              <span>2. Phase-Out (Old) Component Specification &amp; Physical Netting</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">REPLACEMENT COMPONENT ID</label>
-              <input type="text" id="inpPartNew" placeholder="e.g. COMP-B-208" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr 1fr 1fr 1fr; gap: 0.75rem;">
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">CURRENT PART ID *</label>
+                <input type="text" id="inpPartOld" placeholder="e.g. COMP-A-104" required style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">REVISION</label>
+                <input type="text" id="inpRevOld" value="Rev A" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">ON-HAND STOCK *</label>
+                <input type="number" id="inpStock" min="0" value="680" required style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">RESERVED STOCK</label>
+                <input type="number" id="inpReservedOld" min="0" value="80" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">ALLOCATED STOCK</label>
+                <input type="number" id="inpAllocatedOld" min="0" value="0" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.65rem; font-size: 0.75rem; color: var(--text-muted);">
+              <span>Unit Holding / Scrap Cost: <strong>$<input type="number" id="inpUnitCost" value="12.00" step="0.5" style="width: 60px; padding: 0.15rem 0.35rem; border: 1px solid var(--border-color); border-radius: var(--radius-xs); font-family: var(--font-mono); font-size: 0.75rem;"> / unit</strong></span>
+              <span>Freely Available Stock: <strong id="calcAvailablePreview" style="color: var(--navy-primary); font-family: var(--font-mono);">600 Units</strong> (On-hand &minus; Reserved &minus; Allocated)</span>
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">CURRENT WAREHOUSE STOCK (UNITS)</label>
-              <input type="number" id="inpStock" min="0" value="680" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+          <!-- Section 3: Phase-In (Replacement) Component & Supply Readiness -->
+          <div style="margin-bottom: 1.25rem; background: var(--bg-surface-subtle); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 700; color: var(--success-green); text-transform: uppercase; margin-bottom: 0.75rem;">
+              <span>3. Phase-In (New) Replacement Component &amp; Supplier Readiness</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">DAILY CONSUMPTION RATE (UNITS/DAY)</label>
-              <input type="number" id="inpDemand" min="1" value="40" required style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.85rem;">
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr 1fr 1fr 1fr; gap: 0.75rem;">
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">REPLACEMENT ID *</label>
+                <input type="text" id="inpPartNew" placeholder="e.g. COMP-B-208" required style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">REVISION</label>
+                <input type="text" id="inpRevNew" value="Rev B" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">DOCK READY DAY *</label>
+                <input type="number" id="inpDockDay" min="1" max="31" value="11" required style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">PO QUANTITY</label>
+                <input type="number" id="inpPoQty" min="0" value="800" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">LEAD TIME (DAYS)</label>
+                <input type="number" id="inpLeadTime" min="1" value="25" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.65rem; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                PO Status: 
+                <select id="inpPoStatus" style="padding: 0.15rem 0.4rem; border: 1px solid var(--border-color); border-radius: var(--radius-xs); font-size: 0.75rem; background: #FFF;">
+                  <option value="confirmed">Confirmed Dock Date</option>
+                  <option value="acknowledged">Vendor Acknowledged</option>
+                  <option value="pending">Pending Vendor Formal PO</option>
+                </select>
+              </div>
+              <div>
+                Dual-Source: 
+                <select id="inpDualSource" style="padding: 0.15rem 0.4rem; border: 1px solid var(--border-color); border-radius: var(--radius-xs); font-size: 0.75rem; background: #FFF;">
+                  <option value="true">Qualified Dual-Source Available</option>
+                  <option value="false">Single-Source Dependency</option>
+                </select>
+              </div>
+              <span>Replacement Cost: <strong>$<input type="number" id="inpUnitCostNew" value="14.50" step="0.5" style="width: 60px; padding: 0.15rem 0.35rem; border: 1px solid var(--border-color); border-radius: var(--radius-xs); font-family: var(--font-mono); font-size: 0.75rem;"> / unit</strong></span>
             </div>
           </div>
 
-          <div>
-            <label style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.35rem;">CHANGE DESCRIPTION &amp; ENGINEERING REASON</label>
-            <textarea id="inpReason" rows="3" placeholder="State technical justification for revision (e.g. form-fit-function upgrade, obsolescence)..." style="width: 100%; padding: 0.4rem 0.65rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.85rem; font-family: var(--font-sans);"></textarea>
+          <!-- Section 4: Production Demand & Cutover Constraints -->
+          <div style="margin-bottom: 0.5rem; background: var(--bg-surface-subtle); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); font-weight: 700; color: var(--navy-primary); text-transform: uppercase; margin-bottom: 0.75rem;">
+              <span>4. Production Demand &amp; Cutover Constraints</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.75rem;">
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">DAILY DEMAND *</label>
+                <input type="number" id="inpDemand" min="1" value="40" required style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">SAFETY BUFFER (DAYS)</label>
+                <input type="number" id="inpSafetyBuffer" min="0" max="10" value="2" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">SHORTAGE PENALTY ($/U)</label>
+                <input type="number" id="inpShortagePenalty" min="10" value="45" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: 0.825rem;">
+              </div>
+              <div>
+                <label style="font-size: 0.725rem; font-family: var(--font-mono); font-weight: 600; color: var(--navy-primary); display: block; margin-bottom: 0.25rem;">CUTOVER CONSTRAINT</label>
+                <select id="inpConstraint" style="width: 100%; padding: 0.4rem 0.55rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 0.8rem; background: #FFF;">
+                  <option value="BALANCED">Balanced Optimal (Min Cost &amp; Zero Starvation)</option>
+                  <option value="EXHAUST_OLD">Exhaust Old Inventory First (Scrap Avoidance)</option>
+                  <option value="ASAP_DOCK">Earliest Feasible Dock Cutover</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="app-modal-footer">
+        <div class="app-modal-footer" style="padding: 0.85rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #FFF;">
           <button type="button" class="btn btn-secondary" id="cancelNewEcnBtn">Cancel</button>
-          <button type="submit" class="btn btn-primary">Create &amp; Launch Analysis</button>
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="submit" class="btn btn-primary" id="submitNewEcnBtn">Validate, Save &amp; Run Optimization &rarr;</button>
+          </div>
         </div>
+      </form>
+    </div>
+  </div>
       </form>
     </div>
   </div>

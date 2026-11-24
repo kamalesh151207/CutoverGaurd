@@ -29,30 +29,58 @@ export function initPlannerWorkspace(calculationService) {
     plannerActivityLog.prepend(div);
   }
 
+  function updateCockpitDisplay() {
+    const ecn = calculationService.activeEcn || {};
+    const optSummary = calculationService.cutoverModel.getOptimizationSummary();
+    const optDay = calculationService.cutoverModel.targetOptimalDay || 15;
+    const recDate = `${optDay < 10 ? '0' + optDay : optDay} DEC 2026`;
+
+    const cockpitTitle = document.querySelector('.workspace-cockpit h3');
+    if (cockpitTitle) {
+      cockpitTitle.textContent = `Engineering Change Order ${ecn.id || 'ECN-0248'}`;
+    }
+    const cockpitSub = document.querySelector('.workspace-cockpit .cockpit-top-bar > div:first-child > div:last-child');
+    if (cockpitSub) {
+      cockpitSub.textContent = `Component ${ecn.partOld || 'COMP-A-104'} → ${ecn.partNew || 'COMP-B-208'} | Owner: ${ecn.plant || 'Plant 3'} Material Planning`;
+    }
+    const cockpitDate = document.querySelector('.workspace-cockpit .cockpit-top-bar > div:last-child > div:last-child');
+    if (cockpitDate) {
+      cockpitDate.textContent = recDate;
+    }
+  }
+
   function commitApproval(source = 'Cockpit') {
     const currentState = getState();
+    const ecn = calculationService.activeEcn || {};
+    const optSummary = calculationService.cutoverModel.getOptimizationSummary();
+    const optimalDay = calculationService.cutoverModel.targetOptimalDay || 15;
+    const evaluated = calculationService.evaluateCandidateDay(optimalDay);
+    const recDate = `${optimalDay < 10 ? '0' + optimalDay : optimalDay}-DEC-2026`;
+    const earlyDate = `${optSummary.earliestFeasibleDay < 10 ? '0' + optSummary.earliestFeasibleDay : optSummary.earliestFeasibleDay}-DEC`;
+    const lrmDate = `${optSummary.lrmDay < 10 ? '0' + optSummary.lrmDay : optSummary.lrmDay}-DEC`;
+
     if (cockpitStatusBadge) {
       cockpitStatusBadge.className = 'badge badge-feasible';
       cockpitStatusBadge.textContent = 'STATUS: APPROVED — COMMITTED TO SCHEDULE';
     }
     const overviewStatus = document.getElementById('overviewActiveStatus');
     if (overviewStatus) {
-      overviewStatus.textContent = 'Approved — Committed to Plant Line 3';
+      overviewStatus.textContent = `Approved — Committed for ${recDate}`;
     }
 
-    addLog(`[APPROVAL CONFIRMED via ${source}] Planner PLN-8842 signed cutover for 15 DEC 2026. Signed block appended to audit chain.`, true);
+    addLog(`[APPROVAL CONFIRMED via ${source}] Planner PLN-8842 signed cutover for ${recDate}. Signed block appended to audit chain.`, true);
 
     const newDecision = {
       id: `DEC-${new Date().getFullYear()}-${String(Math.floor(100 + Math.random() * 900))}`,
-      ecn: currentState.ecn,
-      parts: `${currentState.componentOld} → ${currentState.componentNew}`,
+      ecn: ecn.id || currentState.ecn || 'ECN-0248',
+      parts: `${ecn.partOld || currentState.componentOld || 'COMP-A-104'} → ${ecn.partNew || currentState.componentNew || 'COMP-B-208'}`,
       runVersion: 'v1.4 (Deterministic Netting)',
-      recommendedDate: '15-DEC-2026',
-      feasibleWindow: '11-DEC to 19-DEC',
-      lrm: '19-DEC-2026',
-      costIndex: 82.4,
-      excessStock: '120 units',
-      shortageRisk: '0.0%',
+      recommendedDate: recDate,
+      feasibleWindow: `${earlyDate} to ${lrmDate}`,
+      lrm: lrmDate,
+      costIndex: Number(evaluated.totalIndex.toFixed(1)),
+      excessStock: `${evaluated.excessOldUnits} units`,
+      shortageRisk: evaluated.shortageUnits > 0 ? `${evaluated.shortageUnits} units` : '0.0%',
       action: 'APPROVED',
       planner: 'PLN-8842 (Senior Plant Planner)',
       timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC',
@@ -60,30 +88,31 @@ export function initPlannerWorkspace(calculationService) {
       hash: Math.random().toString(16).slice(2, 26)
     };
 
-    // Persist to PostgreSQL database
+    // Persist to PostgreSQL database and local storage
     dbService.saveDecision(newDecision).catch(err => console.warn('Could not save decision to DB:', err));
     dbService.saveAuditRecord({
       id: `REC-${String(Math.floor(100 + Math.random() * 900))}`,
       type: 'PLANNER_APPROVAL_COMMIT',
       ts: new Date().toISOString(),
-      data: { plannerId: 'PLN-8842', action: 'APPROVED', cutoverCommitted: '15 DEC 2026', ecn: currentState.ecn },
+      data: { plannerId: 'PLN-8842', action: 'APPROVED', cutoverCommitted: recDate, ecn: newDecision.ecn },
       prevHash: newDecision.hash,
       hash: Math.random().toString(16).slice(2, 34)
     }).catch(err => console.warn('Could not save audit to DB:', err));
 
     EventBus.emit('planner:action', {
       action: 'APPROVED',
-      ecn: currentState.ecn,
-      parts: `${currentState.componentOld} → ${currentState.componentNew}`,
-      date: '15-DEC-2026',
-      costIndex: 82.4
+      ecn: newDecision.ecn,
+      parts: newDecision.parts,
+      date: recDate,
+      costIndex: newDecision.costIndex
     });
 
-    showActionToast('Cutover date 15-DEC approved and committed to plant schedule.');
+    showActionToast(`Cutover date ${recDate} approved and committed to plant schedule.`);
   }
 
   function commitDeferral(source = 'Cockpit') {
     const currentState = getState();
+    const ecn = calculationService.activeEcn || {};
     if (cockpitStatusBadge) {
       cockpitStatusBadge.className = 'badge badge-risk';
       cockpitStatusBadge.textContent = 'STATUS: DEFERRED PENDING SUPPLIER RE-CONFIRMATION';
@@ -93,12 +122,12 @@ export function initPlannerWorkspace(calculationService) {
       overviewStatus.textContent = 'Deferred — Vendor Confirmation Pending';
     }
 
-    addLog(`[DECISION DEFERRED via ${source}] Transition deferred by planner pending vendor lead-time re-confirmation.`, false);
+    addLog(`[DECISION DEFERRED via ${source}] Transition for ${ecn.id || 'ECN'} deferred by planner pending vendor lead-time re-confirmation.`, false);
 
     EventBus.emit('planner:action', {
       action: 'DEFERRED',
-      ecn: currentState.ecn,
-      parts: `${currentState.componentOld} → ${currentState.componentNew}`,
+      ecn: ecn.id || currentState.ecn,
+      parts: `${ecn.partOld || currentState.componentOld} → ${ecn.partNew || currentState.componentNew}`,
       date: 'Pending',
       costIndex: 112.5
     });
@@ -107,6 +136,21 @@ export function initPlannerWorkspace(calculationService) {
   }
 
   function triggerRecalculate() {
+    if (cockpitStatusBadge) {
+      cockpitStatusBadge.className = 'badge badge-warning';
+      cockpitStatusBadge.textContent = 'STATUS: RE-CALCULATING CONSTRAINTS...';
+      setTimeout(() => {
+        cockpitStatusBadge.textContent = 'STATUS: PENDING PLANNER APPROVAL';
+      }, 500);
+    }
+    addLog('[RECALCULATION REQUESTED] Input parameters refreshed. Re-executing deterministic netting kernel...', false);
+    const dateSlider = document.getElementById('cutoverDateSlider');
+    const day = dateSlider ? parseInt(dateSlider.value, 10) : (calculationService.cutoverModel.targetOptimalDay || 15);
+    const model = calculationService.evaluateCandidateDay(day);
+    EventBus.emit('cutover:evaluated', model);
+
+    showActionToast('Deterministic netting recalculation completed successfully.');
+  }
     if (cockpitStatusBadge) {
       cockpitStatusBadge.className = 'badge badge-warning';
       cockpitStatusBadge.textContent = 'STATUS: RE-CALCULATING CONSTRAINTS...';
@@ -147,4 +191,10 @@ export function initPlannerWorkspace(calculationService) {
   if (ovActionReviewDecision) ovActionReviewDecision.addEventListener('click', () => router.navigate('/cutover'));
   if (ovActionApproveCutover) ovActionApproveCutover.addEventListener('click', () => commitApproval('Dashboard'));
   if (ovActionDeferDecision) ovActionDeferDecision.addEventListener('click', () => commitDeferral('Dashboard'));
+
+  EventBus.on('ecn:changed', updateCockpitDisplay);
+  EventBus.on('calculations:reconfigured', updateCockpitDisplay);
+
+  // Initial sync
+  updateCockpitDisplay();
 }
