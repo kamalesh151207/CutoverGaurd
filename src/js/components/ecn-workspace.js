@@ -63,19 +63,22 @@ export function initEcnWorkspace() {
                               item.statusCode === 'ANALYSIS_READY' ? 'badge-feasible' : 'badge-risk';
       const readinessBadgeClass = item.readiness === 'READY' ? 'badge-feasible' :
                                   item.readiness === 'NEEDS_VALIDATION' ? 'badge-warning' : 'badge-risk';
+      const revParts = (item.revision || '').split('→');
+      const revOld = revParts[0]?.trim() || item.revOld || 'Rev A';
+      const revNew = revParts[1]?.trim() || item.revNew || 'Rev B';
 
       return `
-        <tr class="${isActive ? 'active-row' : ''}">
+        <tr class="${isActive ? 'active-row' : ''}" data-ecn-id="${item.id}" style="cursor: pointer;">
           <td style="font-family: var(--font-mono); font-weight: 700; color: var(--navy-primary);">
             ${item.id} ${isActive ? '<span class="badge badge-blue" style="font-size: 0.65rem; margin-left: 0.25rem;">ACTIVE</span>' : ''}
           </td>
           <td>
             <div style="font-family: var(--font-mono); font-weight: 600;">${item.partOld}</div>
-            <div style="font-size: 0.75rem; color: var(--text-light);">${item.revision.split('→')[0].trim()}</div>
+            <div style="font-size: 0.75rem; color: var(--text-light);">${revOld}</div>
           </td>
           <td>
             <div style="font-family: var(--font-mono); font-weight: 600; color: var(--blue-primary);">${item.partNew}</div>
-            <div style="font-size: 0.75rem; color: var(--text-light);">${item.revision.split('→')[1].trim()}</div>
+            <div style="font-size: 0.75rem; color: var(--text-light);">${revNew}</div>
           </td>
           <td style="font-size: 0.825rem; max-width: 240px;">
             <div style="font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.changeType}</div>
@@ -152,8 +155,9 @@ export function initEcnWorkspace() {
   if (ecnTableBody) {
     ecnTableBody.addEventListener('click', (e) => {
       const btn = e.target.closest('.select-ecn-btn');
-      if (btn) {
-        const id = btn.getAttribute('data-ecn-id');
+      const row = e.target.closest('tr[data-ecn-id]');
+      const id = btn ? btn.getAttribute('data-ecn-id') : (row ? row.getAttribute('data-ecn-id') : null);
+      if (id) {
         setActiveEcn(id);
         router.navigate('/cutover');
       }

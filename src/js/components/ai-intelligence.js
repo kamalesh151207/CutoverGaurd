@@ -111,6 +111,7 @@ export function initAiIntelligence(calculationService) {
   }
 
   // Update when ECN or calculations change
+  EventBus.on('ecn:changed', renderPredictions);
   EventBus.on('calculations:reconfigured', renderPredictions);
   EventBus.on('cutover:evaluated', (model) => {
     if (aiGeneratedNarrative) {

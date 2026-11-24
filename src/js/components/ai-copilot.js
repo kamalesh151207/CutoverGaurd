@@ -125,7 +125,7 @@ export function initAiCopilot(calculationService) {
 
     msgEl.innerHTML = `
       <div style="font-weight: 700; font-size: 0.75rem; color: ${isUser ? 'var(--blue-primary)' : 'var(--navy-primary)'}; margin-bottom: 0.25rem; display: flex; justify-content: space-between;">
-        <span>${isUser ? 'Planner Query' : 'CutoverGuard AI Copilot'}</span>
+        <span>${isUser ? 'Planner Query' : 'CutoverGuard Grounded Decision Copilot (Rule-Based Engine)'}</span>
         <span style="font-size: 0.7rem; color: var(--text-light); font-weight: normal;">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
       <div>${text.replace(/\n/g, '<br>')}</div>
@@ -160,9 +160,18 @@ export function initAiCopilot(calculationService) {
 
   copilotQuickPromptBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      const prompt = btn.getAttribute('data-prompt') || btn.textContent;
+      const prompt = btn.getAttribute('data-question') || btn.getAttribute('data-prompt') || btn.textContent.trim();
       handleSend(prompt);
     });
+  });
+
+  EventBus.on('ecn:changed', (ecn) => {
+    if (copilotChatContainer) {
+      appendMessage(
+        'bot',
+        `Active context switched to **${ecn.id || 'ECN-0248'}** (${ecn.partOld} → ${ecn.partNew}). Optimization calculations have been synchronized.`
+      );
+    }
   });
 
   // Initial greeting

@@ -514,7 +514,7 @@
               <button class="btn btn-secondary btn-sm" id="generateAiExpBtn" style="padding: 0.2rem 0.55rem; font-size: 0.725rem;">Regenerate Explanation</button>
             </div>
             <p id="aiGeneratedNarrative" style="font-size: 0.825rem; color: var(--text-main); margin: 0; line-height: 1.45;">
-              Loading grounded industrial explanation from deterministic engine...
+              Transitioning on 15 DEC provides an optimal balance with 120 units of old stock remaining and 0 units of shortage exposure, achieving a relative cost index of 82.4 within the feasible boundary.
             </p>
           </div>
         </div>
@@ -1476,8 +1476,8 @@
 
           <div class="control-item">
             <label for="scenarioStockSlider">Old Stock on Hand</label>
-            <input type="range" id="scenarioStockSlider" min="300" max="900" value="600" step="50" />
-            <div class="control-val-readout" id="scenarioStockVal">600 Units</div>
+            <input type="range" id="scenarioStockSlider" min="300" max="1200" value="680" step="20" />
+            <div class="control-val-readout" id="scenarioStockVal">680 Units</div>
           </div>
 
           <div class="control-item">
@@ -1824,16 +1824,16 @@
           <div class="card-header">
             <div>
               <h3 class="card-title">AI Model Card &amp; Algorithmic Transparency</h3>
-              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Detailed model architecture, training horizon, calibration metrics, and deterministic constraint boundaries.</p>
+              <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0.25rem 0 0;">Detailed model architecture, calibration metrics, and deterministic constraint boundaries (Demonstration / Synthetic Benchmark).</p>
             </div>
-            <span class="badge badge-feasible">ISO/IEC 42001 COMPLIANT</span>
+            <span class="badge badge-neutral">ILLUSTRATIVE BENCHMARK SPECIFICATION</span>
           </div>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
             <div style="background: var(--bg-surface-subtle); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--border-color);">
               <div style="font-size: 0.725rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.35rem;">Model Architecture</div>
               <div style="font-size: 0.85rem; font-weight: 700; color: var(--navy-primary);">Gradient-Boosted Decision Ensemble &amp; Isotonic Calibration v2.4</div>
-              <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.35rem;">Trained on 2,400 verified industrial change notices across automotive, aerospace, and heavy machinery supply chains.</div>
+              <div style="font-size: 0.775rem; color: var(--text-muted); margin-top: 0.35rem;">Simulated benchmark envelope based on synthetic industrial change notices across automotive and machinery scenarios (Demonstration).</div>
             </div>
 
             <div style="background: var(--bg-surface-subtle); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--border-color);">
